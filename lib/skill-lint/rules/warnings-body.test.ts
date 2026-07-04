@@ -17,6 +17,12 @@ function idsFor(body: string): string[] {
   return findings(body).map((f) => f.ruleId);
 }
 
+function run(files: SkillFile[]) {
+  const r = parseSkill(files);
+  if (r.kind !== "skill") throw new Error("fixture is not a skill: " + r.reason);
+  return runRules(r.skill, warningBodyRules, { profile: "generic" });
+}
+
 describe("W01 oversized body", () => {
   it("fires at 500+ lines", () => {
     expect(idsFor(Array.from({ length: 500 }, () => "line").join("\n"))).toContain("W01");
@@ -34,6 +40,11 @@ describe("W06 second-person body", () => {
   });
   it("does not fire on imperative prose", () => {
     expect(idsFor("Run the tests. Commit the result.")).not.toContain("W06");
+  });
+  it("does not fire on second-person text inside fences", () => {
+    const content = `---\nname: demo\ndescription: Use when testing\n---\nprose line\n\`\`\`\nyou should do this\n\`\`\`\n`;
+    const out = run([{ path: "SKILL.md", content }]);
+    expect(out.map((f) => f.ruleId)).not.toContain("W06");
   });
 });
 
@@ -57,6 +68,26 @@ describe("W08 backslash paths with autofix", () => {
   });
   it("does not fire on forward-slash paths", () => {
     expect(idsFor("See references/api.md")).not.toContain("W08");
+  });
+  it("fix does not touch backslash content inside fenced code blocks", () => {
+    const content = `---\nname: demo\ndescription: Use when testing fences\n---\nSee docs\\guide.md here\n\`\`\`\ncopy C:\\temp\\a.txt .\nregex: test\\d+\n\`\`\`\n`;
+    const files = [{ path: "SKILL.md", content }];
+    const out = run(files);
+    const w08 = out.find((f) => f.ruleId === "W08");
+    expect(w08?.fix).toBeDefined();
+    const fixed = w08!.fix!.apply(files)[0].content;
+    expect(fixed).toContain("docs/guide.md");
+    expect(fixed).toContain("C:\\temp\\a.txt");
+    expect(fixed).toContain("test\\d+");
+  });
+  it("fix leaves non-path backslash prose (regex examples) unchanged", () => {
+    const content = `---\nname: demo\ndescription: Use when testing regex prose\n---\nUse pattern foo\\d+ and open refs\\api.md\n`;
+    const files = [{ path: "SKILL.md", content }];
+    const out = run(files);
+    const w08 = out.find((f) => f.ruleId === "W08");
+    const fixed = w08!.fix!.apply(files)[0].content;
+    expect(fixed).toContain("foo\\d+");
+    expect(fixed).toContain("refs/api.md");
   });
 });
 

@@ -43,31 +43,43 @@ const w06: Rule = {
   },
 };
 
+function looksLikePath(m: string): boolean {
+  const backslashCount = (m.match(/\\/g) || []).length;
+  return /\.[A-Za-z0-9]{1,5}(\b|$)/.test(m) || backslashCount >= 2;
+}
+
 const w08: Rule = {
   id: "W08",
   severity: "warning",
   check(s) {
     const skillPath = s.skillFile.path;
+    const flagged = s.body.proseLines.filter((l) => BACKSLASH_PATH.test(l.text)).slice(0, CAP);
+    if (flagged.length === 0) return [];
+    const flaggedLineNumbers = flagged.map((l) => l.line);
     const fix = {
       label: "Convert backslash paths to forward slashes",
       apply(files: SkillFile[]): SkillFile[] {
-        return files.map((f) =>
-          f.path === skillPath
-            ? { ...f, content: f.content.replace(BACKSLASH_PATH_G, (m) => m.replace(/\\/g, "/")) }
-            : f
-        );
+        return files.map((f) => {
+          if (f.path !== skillPath) return f;
+          const lines = f.content.split("\n");
+          for (const lineNo of flaggedLineNumbers) {
+            const idx = lineNo - 1;
+            if (idx < 0 || idx >= lines.length) continue;
+            lines[idx] = lines[idx].replace(BACKSLASH_PATH_G, (m) =>
+              looksLikePath(m) ? m.replace(/\\/g, "/") : m
+            );
+          }
+          return { ...f, content: lines.join("\n") };
+        });
       },
     };
-    return s.body.proseLines
-      .filter((l) => BACKSLASH_PATH.test(l.text))
-      .slice(0, CAP)
-      .map((l) =>
-        mk("W08", "warning",
-          `Windows-style backslash path on line ${l.line}`,
-          "Backslash paths break on macOS and Linux where Claude Code runs; paths must use forward slashes.",
-          "Use forward slashes, e.g. references/api.md.",
-          { line: l.line, fix })
-      );
+    return flagged.map((l) =>
+      mk("W08", "warning",
+        `Windows-style backslash path on line ${l.line}`,
+        "Backslash paths break on macOS and Linux where Claude Code runs; paths must use forward slashes.",
+        "Use forward slashes, e.g. references/api.md.",
+        { line: l.line, fix })
+    );
   },
 };
 
