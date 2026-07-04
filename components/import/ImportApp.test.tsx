@@ -335,6 +335,21 @@ describe("ImportApp — signed-in panel", () => {
     expect(await screen.findByText("alpha")).toBeTruthy();
   });
 
+  it("does NOT swallow non-422 errors from create-skills-repo (403 scope surfaces)", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const createRepo = vi.fn(async () => {
+      throw new GitHubError(403, "Resource not accessible by personal access token");
+    });
+    const client = signedInClient({ createRepo });
+    render(<ImportApp createClientFn={() => client} />);
+
+    const createBtn = await screen.findByRole("button", { name: /create skills repo/i });
+    fireEvent.click(createBtn);
+
+    expect(await screen.findByText(/resource not accessible/i)).toBeTruthy();
+    expect(screen.queryByText("alpha")).toBeNull();
+  });
+
   it("Sign out clears the token and hides the signed-in panel", async () => {
     localStorage.setItem(TOKEN_KEY, "ghp_x");
     const client = signedInClient();
