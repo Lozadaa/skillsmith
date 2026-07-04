@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ImportApp from "./ImportApp";
-import { RateLimitError, type GitHubClient } from "@/lib/github/client";
+import { NotFoundError, RateLimitError, type GitHubClient } from "@/lib/github/client";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -59,6 +59,47 @@ describe("ImportApp", () => {
     expect(push).toHaveBeenCalledWith("/workspace");
   });
 
+  it("disables every Open button while any row's fetch is in flight", async () => {
+    let resolveBlob: (v: string) => void = () => {};
+    let aCalls = 0;
+    const slowClient: GitHubClient = {
+      getRepoTree: async () => ({
+        entries: [
+          { path: "skills/alpha/SKILL.md", mode: "100644", type: "blob", sha: "a" },
+          { path: "skills/beta/SKILL.md", mode: "100644", type: "blob", sha: "b" },
+        ],
+        truncated: false,
+      }),
+      getBlobText: (_o, _r, sha) => {
+        // First call per sha is the picker's mini-lint scan; only the *second*
+        // call for "a" (the openSkill fetch) hangs, so we can observe the
+        // in-flight disabled state without deadlocking the initial scan.
+        if (sha === "a") {
+          aCalls++;
+          if (aCalls > 1) return new Promise((resolve) => (resolveBlob = resolve));
+        }
+        return Promise.resolve(SKILL_MD);
+      },
+      getReadme: async () => "",
+      getGistFiles: async () => [],
+    };
+    render(<ImportApp createClientFn={() => slowClient} />);
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    const openButtons = await screen.findAllByRole("button", { name: /^open|opening/i });
+    expect(openButtons).toHaveLength(2);
+    fireEvent.click(openButtons[0]);
+
+    await vi.waitFor(() => {
+      const buttons = screen.getAllByRole("button", { name: /^open|opening/i });
+      expect(buttons.every((b) => (b as HTMLButtonElement).disabled)).toBe(true);
+    });
+
+    resolveBlob(SKILL_MD);
+    await vi.waitFor(() => expect(stash).toHaveBeenCalledTimes(1));
+  });
+
   it("opens the token field when the rate-limit CTA is clicked", async () => {
     const rateLimitedClient: GitHubClient = {
       getRepoTree: async () => {
@@ -77,6 +118,24 @@ describe("ImportApp", () => {
 
     fireEvent.click(cta);
 
+    expect(await screen.findByLabelText(/personal access token/i)).toBeTruthy();
+  });
+
+  it("shows the add-a-token CTA for a not-found (likely private) repo", async () => {
+    const notFoundClient: GitHubClient = {
+      getRepoTree: async () => {
+        throw new NotFoundError("repo not found or private — add a token for private repos");
+      },
+      getBlobText: async () => SKILL_MD,
+      getReadme: async () => "",
+      getGistFiles: async () => [],
+    };
+    render(<ImportApp createClientFn={() => notFoundClient} />);
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    const cta = await screen.findByRole("button", { name: /add a token/i });
+    fireEvent.click(cta);
     expect(await screen.findByLabelText(/personal access token/i)).toBeTruthy();
   });
 });

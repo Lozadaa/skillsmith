@@ -48,11 +48,19 @@ describe("fetchSkillFiles", () => {
     expect(out.skipped).toEqual([]);
   });
 
-  it("fetches only SKILL.md for a root single-file skill", async () => {
-    const entries = [entry("SKILL.md", "root"), entry("README.md", "readme")];
+  it("keeps references/ and scripts/ alongside SKILL.md for a root single-file skill, excluding repo noise", async () => {
+    const entries = [
+      entry("SKILL.md", "root"),
+      entry("references/api.md", "ref"),
+      entry("scripts/run.py", "script"),
+      entry("README.md", "readme"),
+      entry("src/index.ts", "src"),
+    ];
     const skill: DetectedSkillRef = { dirPath: "", name: "my-skill", origin: "root", viaSymlink: false };
     const out = await fetchSkillFiles(mockClient(), "o", "r", "main", skill, entries);
-    expect(out.files.map((f) => f.path)).toEqual(["SKILL.md"]);
+    expect(out.files.map((f) => f.path).sort()).toEqual(["SKILL.md", "references/api.md", "scripts/run.py"]);
+    expect(out.files.some((f) => f.path === "README.md")).toBe(false);
+    expect(out.files.some((f) => f.path === "src/index.ts")).toBe(false);
     expect(out.dirName).toBe("my-skill");
   });
 

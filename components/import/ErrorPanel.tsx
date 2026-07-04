@@ -14,14 +14,23 @@ export default function ErrorPanel({ error, onNeedToken }: { error: unknown; onN
       </div>
     );
   }
+  if (error instanceof NotFoundError) {
+    return (
+      <div className="rounded border border-red-400 bg-red-50 p-4">
+        <h2 className="font-semibold">Import failed</h2>
+        <p className="mt-1 text-sm">{error.message}</p>
+        <button type="button" onClick={onNeedToken} className="mt-2 text-sm text-blue-600 underline">
+          Add a token
+        </button>
+      </div>
+    );
+  }
   const message =
-    error instanceof NotFoundError
-      ? error.message
-      : error instanceof GitHubError
-        ? `GitHub error ${error.status}: ${error.message}`
-        : error instanceof Error
-          ? error.message
-          : "Something went wrong.";
+    error instanceof GitHubError
+      ? `GitHub error ${error.status}: ${error.message}`
+      : error instanceof Error
+        ? error.message
+        : "Something went wrong.";
   return (
     <div className="rounded border border-red-400 bg-red-50 p-4">
       <h2 className="font-semibold">Import failed</h2>

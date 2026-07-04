@@ -59,7 +59,7 @@ export default function SkillPicker({
               <td className="py-2 text-right">
                 <button
                   type="button"
-                  disabled={busyDir === s.ref.dirPath}
+                  disabled={busyDir !== null}
                   onClick={() => onOpen(s)}
                   className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
                 >

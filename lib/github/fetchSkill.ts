@@ -11,6 +11,9 @@ export interface FetchedSkill {
 const MAX_BYTES = 2 * 1024 * 1024;
 const CONCURRENCY = 4;
 
+/** Conventional skill subdirs that ride along with a root-level SKILL.md. */
+const ROOT_SKILL_SUBDIRS = ["references", "reference", "resources", "scripts", "assets", "examples", "templates"];
+
 function basename(p: string): string {
   const i = p.lastIndexOf("/");
   return i === -1 ? p : p.slice(i + 1);
@@ -58,7 +61,14 @@ export async function fetchSkillFiles(
   let blobs: TreeEntry[];
   if (skill.dirPath === "") {
     const skillMd = findSkillMd(skill, entries);
-    blobs = skillMd ? [skillMd] : [];
+    blobs = skillMd
+      ? entries.filter((e) => {
+          if (e.type !== "blob") return false;
+          if (e.path === skillMd.path) return true;
+          const topDir = e.path.includes("/") ? e.path.slice(0, e.path.indexOf("/")) : "";
+          return ROOT_SKILL_SUBDIRS.includes(topDir);
+        })
+      : [];
   } else {
     const prefix = skill.dirPath + "/";
     blobs = entries.filter((e) => e.type === "blob" && e.path.startsWith(prefix));
