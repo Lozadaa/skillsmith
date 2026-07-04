@@ -124,6 +124,20 @@ describe("publishSkill — existing repo", () => {
     expect(treeEntries.map((e: { path: string }) => e.path).sort()).toEqual(["plugins/demo/SKILL.md", "plugins/demo/references/api.md"]);
   });
 
+  it("joins paths with no leading slash when pathPrefix normalizes to empty (\"/\")", async () => {
+    const client = stubClient();
+    await publishSkill(client, {
+      target: { mode: "existing", owner: "me", repo: "monorepo", branch: "main", pathPrefix: "/" },
+      files: FILES,
+      dirName: "demo",
+      message: "m",
+    });
+    const treeEntries = (client.createTree as ReturnType<typeof vi.fn>).mock.calls[0][3];
+    const paths = treeEntries.map((e: { path: string }) => e.path);
+    expect(paths.every((p: string) => !p.startsWith("/"))).toBe(true);
+    expect(paths.sort()).toEqual(["SKILL.md", "references/api.md"]);
+  });
+
   it("skips symlink files and reports them", async () => {
     const client = stubClient();
     const withLink: SkillFile[] = [...FILES, { path: "shared.md", content: "../other/shared.md", symlink: true }];

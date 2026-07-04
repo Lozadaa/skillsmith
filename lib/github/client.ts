@@ -81,6 +81,12 @@ interface RawTreeEntry {
   size?: number;
 }
 
+/** Encode a ref path (e.g. a branch name) segment-wise so literal slashes in
+ *  nested branches like "release/2.0" survive instead of becoming %2F. */
+function encodeRefPath(ref: string): string {
+  return ref.split("/").map(encodeURIComponent).join("/");
+}
+
 /** atob + TextDecoder so multibyte UTF-8 blobs decode correctly. */
 export function decodeBase64(b64: string): string {
   const clean = b64.replace(/\s+/g, "");
@@ -204,7 +210,7 @@ export function createClient(opts: { token?: string; fetchFn?: typeof fetch } = 
 
   async function getRef(owner: string, repo: string, branch: string): Promise<{ sha: string }> {
     const data = await api<{ object: { sha: string } }>(
-      `/repos/${owner}/${repo}/git/ref/heads/${encodeURIComponent(branch)}`
+      `/repos/${owner}/${repo}/git/ref/heads/${encodeRefPath(branch)}`
     );
     return { sha: data.object.sha };
   }
@@ -255,7 +261,7 @@ export function createClient(opts: { token?: string; fetchFn?: typeof fetch } = 
 
   async function updateRef(owner: string, repo: string, branch: string, commitSha: string): Promise<void> {
     requireToken();
-    await api(`/repos/${owner}/${repo}/git/refs/heads/${encodeURIComponent(branch)}`, {
+    await api(`/repos/${owner}/${repo}/git/refs/heads/${encodeRefPath(branch)}`, {
       method: "PATCH",
       body: { sha: commitSha, force: false },
     });

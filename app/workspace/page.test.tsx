@@ -53,4 +53,30 @@ describe("WorkspacePage paste flow", () => {
     // Not-a-skill → publish disabled.
     expect((screen.getByRole("button", { name: "Publish to GitHub" }) as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it("refreshes the publish dialog's repo name prefill after loading a different skill", async () => {
+    render(<WorkspacePage />);
+
+    // Open publish with the initial demo skill loaded (dirName "my-first-skill").
+    fireEvent.click(screen.getByRole("button", { name: "Publish to GitHub" }));
+    expect((screen.getByLabelText(/repository name/i) as HTMLInputElement).value).toBe("my-first-skill");
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+
+    // Load a different skill via folder upload so dirName changes.
+    fireEvent.click(screen.getByRole("button", { name: "Open…" }));
+    const dirInput = screen.getByLabelText("Upload folder") as HTMLInputElement;
+    const file = new File(
+      [
+        "---\nname: other-skill\ndescription: Use when testing a fresh mount reopen for the publish dialog\n---\n# Body",
+      ],
+      "SKILL.md",
+      { type: "text/markdown" }
+    );
+    Object.defineProperty(file, "webkitRelativePath", { value: "other-skill/SKILL.md" });
+    fireEvent.change(dirInput, { target: { files: [file] } });
+
+    // Reopen publish — repo name must reflect the NEW dirName, not the stale one.
+    fireEvent.click(await screen.findByRole("button", { name: "Publish to GitHub" }));
+    expect((screen.getByLabelText(/repository name/i) as HTMLInputElement).value).toBe("other-skill");
+  });
 });

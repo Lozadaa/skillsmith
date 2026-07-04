@@ -81,4 +81,12 @@ describe("PublishDialog", () => {
       target: { mode: "existing", owner: "me", repo: "mono", pathPrefix: "skills/demo" },
     });
   });
+
+  it("discloses that files at the path prefix will be overwritten in existing-repo mode", () => {
+    render(
+      <PublishDialog open onClose={() => {}} files={FILES} dirName="demo" publishFn={vi.fn()} createClientFn={noopClient} />
+    );
+    fireEvent.click(screen.getByLabelText(/existing repository/i));
+    expect(screen.getByText(/files already at this path will be replaced by this commit/i)).toBeTruthy();
+  });
 });

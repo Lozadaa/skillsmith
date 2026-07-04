@@ -33,6 +33,7 @@ function normalizePrefix(prefix: string): string {
 }
 
 function joinPath(prefix: string, rel: string): string {
+  if (!prefix) return rel;
   return `${prefix}/${rel}`.replace(/\/{2,}/g, "/");
 }
 

@@ -193,6 +193,7 @@ export function PublishDialog({
               onChange={(e) => setPathPrefix(e.target.value)}
               className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
             />
+            <span className="text-xs text-neutral-500">Files already at this path will be replaced by this commit.</span>
           </div>
         )}
 

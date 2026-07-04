@@ -142,12 +142,14 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      <PublishDialog
-        open={showPublish}
-        onClose={() => setShowPublish(false)}
-        files={state.files}
-        dirName={publishDir}
-      />
+      {showPublish && (
+        <PublishDialog
+          open
+          onClose={() => setShowPublish(false)}
+          files={state.files}
+          dirName={publishDir}
+        />
+      )}
     </div>
   );
 }

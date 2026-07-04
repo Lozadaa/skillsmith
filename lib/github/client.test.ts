@@ -208,6 +208,21 @@ describe("write methods: happy paths", () => {
     expect(await client.getCommit("o", "r", "headsha")).toEqual({ treeSha: "treesha" });
   });
 
+  it("getRef encodes a nested branch name segment-wise, keeping literal slashes", async () => {
+    let seenUrl = "";
+    const fetchFn = (async (url: string | URL) => {
+      seenUrl = String(url);
+      return new Response(JSON.stringify({ object: { sha: "headsha" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+    const client = createClient({ token: "t", fetchFn });
+    await client.getRef("o", "r", "release/2.0");
+    expect(seenUrl).toContain("/repos/o/r/git/ref/heads/release/2.0");
+    expect(seenUrl).not.toContain("%2F");
+  });
+
   it("createBlob posts utf-8 content and returns the sha", async () => {
     let body: unknown;
     const fetchFn = (async (_url: string, init?: RequestInit) => {
@@ -252,6 +267,20 @@ describe("write methods: happy paths", () => {
     expect(seen.url).toContain("/repos/o/r/git/refs/heads/main");
     expect(seen.method).toBe("PATCH");
     expect(seen.body).toEqual({ sha: "commitsha", force: false });
+  });
+
+  it("updateRef encodes a nested branch name segment-wise, keeping literal slashes", async () => {
+    let seenUrl = "";
+    const fetchFn = (async (url: string | URL) => {
+      seenUrl = String(url);
+      return new Response(JSON.stringify({ ref: "refs/heads/release/2.0", object: { sha: "commitsha" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+    await createClient({ token: "t", fetchFn }).updateRef("o", "r", "release/2.0", "commitsha");
+    expect(seenUrl).toContain("/repos/o/r/git/refs/heads/release/2.0");
+    expect(seenUrl).not.toContain("%2F");
   });
 });
 
