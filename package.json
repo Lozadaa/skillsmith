@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "start": "serve out",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -11,6 +12,7 @@
     "next": "^15.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "serve": "^14.2.0",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
