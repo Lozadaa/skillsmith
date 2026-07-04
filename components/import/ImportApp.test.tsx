@@ -367,9 +367,9 @@ describe("ImportApp — signed-in panel", () => {
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
   });
 
-  it("shows a filter input and narrows rows once there are more than 8 repos", async () => {
+  it("search-first: lists nothing until a query, then only matches (capped at 10)", async () => {
     localStorage.setItem(TOKEN_KEY, "ghp_x");
-    const repos: UserRepo[] = Array.from({ length: 9 }, (_, i) => ({
+    const repos: UserRepo[] = Array.from({ length: 14 }, (_, i) => ({
       owner: "octocat",
       repo: `repo-${i}`,
       isPrivate: false,
@@ -379,11 +379,19 @@ describe("ImportApp — signed-in panel", () => {
     const client = signedInClient({ listUserRepos: async () => repos });
     render(<ImportApp createClientFn={() => client} />);
 
-    await screen.findByText("octocat/repo-0");
-    const filter = screen.getByLabelText(/filter repos/i);
-    fireEvent.change(filter, { target: { value: "repo-3" } });
+    await screen.findByText(/signed in as/i);
+    // Nothing listed before typing — just the count hint.
+    expect(screen.queryByText("octocat/repo-0")).toBeNull();
+    expect(screen.getByText(/14 repos/i)).toBeTruthy();
 
+    const search = screen.getByLabelText(/search your repos/i);
+    fireEvent.change(search, { target: { value: "repo-3" } });
     expect(screen.getByText("octocat/repo-3")).toBeTruthy();
     expect(screen.queryByText("octocat/repo-0")).toBeNull();
+
+    // Broad query: capped at 10 with an overflow note.
+    fireEvent.change(search, { target: { value: "repo" } });
+    expect(screen.getAllByRole("button", { name: /^scan$/i })).toHaveLength(10);
+    expect(screen.getByText(/4 more matches/i)).toBeTruthy();
   });
 });
