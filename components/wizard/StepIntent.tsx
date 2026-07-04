@@ -45,9 +45,13 @@ export function StepIntent({ state, dispatch }: { state: WizardState; dispatch: 
 
       <label className="block">
         <span className="text-sm font-medium text-ink">Expected output format</span>
+        <span className="block text-xs text-ink-soft">
+          The shape of what the skill produces — e.g. a markdown report with fixed sections, a filled
+          template, a code diff, a pass/fail checklist.
+        </span>
         <input
           className={fieldClass}
-          placeholder="Markdown document with Highlights / Fixes / Breaking sections."
+          placeholder="e.g. Markdown report with Highlights / Fixes / Breaking sections"
           value={state.intent.output}
           onChange={(e) => set("output", e.target.value)}
         />
