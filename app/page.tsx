@@ -84,13 +84,10 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <img
-          src="/blacksmith.png"
-          alt="A blacksmith hammering hot metal on an anvil — hand-drawn in ink."
-          width={560}
-          height={700}
-          loading="eager"
-          className="ink-hero-img w-full max-w-md justify-self-center md:justify-self-end"
+        <div
+          role="img"
+          aria-label="A blacksmith hammering hot metal on an anvil — hand-drawn ink animation."
+          className="ink-hero-img ink-forge w-full max-w-md justify-self-center md:justify-self-end"
         />
       </section>
 
