@@ -9,7 +9,9 @@ import { NameField } from "./NameField";
 const fieldClass =
   "mt-1 w-full rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-400";
 
-const PERSON_RE = /\b(I can|you can|you should)\b/i;
+// Kept local (UI must not import from lib/skill-lint/rules internals), but must byte-match
+// the pattern the engine uses in lib/skill-lint/rules/warnings-description.ts (W04).
+const PERSON_RE = /\b(I can|I will|I'll|you can|you should|you need|use this skill when you)\b/i;
 
 export function StepDescription({ state, dispatch }: { state: WizardState; dispatch: Dispatch<WizardAction> }) {
   const set = (field: "descWhat" | "descWhen" | "descTriggers" | "descNegative", value: string) =>

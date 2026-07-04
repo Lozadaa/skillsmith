@@ -23,10 +23,10 @@ function yamlString(value: string): string {
 export function assembleBody(state: WizardState): string {
   const archetype = getArchetype(state.archetypeId);
   const blocks = archetype
-    ? archetype.sections.map((s) => {
-        const content = (state.sections[s.id] ?? s.defaultContent).trim();
-        return `## ${s.title}\n\n${content}`;
-      })
+    ? archetype.sections
+        .map((s) => ({ title: s.title, content: (state.sections[s.id] ?? s.defaultContent).trim() }))
+        .filter((b) => b.content !== "")
+        .map((b) => `## ${b.title}\n\n${b.content}`)
     : [];
   return [`# ${titleFromName(state.name)}`, ...blocks].join("\n\n");
 }

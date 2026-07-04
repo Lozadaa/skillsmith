@@ -27,8 +27,18 @@ const clampStep = (n: number): number => Math.min(5, Math.max(1, n));
 
 export function wizardReducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
-    case "next":
-      return { ...state, step: clampStep(state.step + 1) };
+    case "next": {
+      const nextStep = clampStep(state.step + 1);
+      if (state.step === 2 && nextStep === 3) {
+        return {
+          ...state,
+          step: nextStep,
+          descWhat: state.descWhat || state.intent.what,
+          descWhen: state.descWhen || state.intent.when,
+        };
+      }
+      return { ...state, step: nextStep };
+    }
     case "back":
       return { ...state, step: clampStep(state.step - 1) };
     case "goto":

@@ -52,8 +52,9 @@ export function seedSections(archetypeId: string | null): Record<string, string>
 export function buildDescription(
   s: Pick<WizardState, "descWhat" | "descWhen" | "descTriggers" | "descNegative">
 ): string {
-  const base = `${s.descWhat}. Use when ${s.descWhen}. Triggers: ${s.descTriggers}.`;
-  return s.descNegative ? `${base} Do not use for ${s.descNegative}.` : base;
+  const clean = (v: string) => v.trim().replace(/\.$/, "");
+  const base = `${clean(s.descWhat)}. Use when ${clean(s.descWhen)}. Triggers: ${clean(s.descTriggers)}.`;
+  return s.descNegative ? `${base} Do not use for ${clean(s.descNegative)}.` : base;
 }
 
 /** Whether the current step has the minimum input needed to move forward. */

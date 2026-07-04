@@ -32,6 +32,23 @@ describe("buildDescription", () => {
       'Produces a demo artifact. Use when the user asks for a demo. Triggers: "make a demo", "demo this".'
     );
   });
+
+  it("strips a trailing period from a field before joining, so it doesn't double up", () => {
+    const s = { ...minimalState("technique"), descWhat: "Does X." };
+    const d = buildDescription(s);
+    expect(d).toContain("Does X. Use when");
+    expect(d).not.toMatch(/\.\./);
+  });
+});
+
+describe("assembleBody section omission", () => {
+  it("omits a section entirely when its content is cleared", () => {
+    const s = minimalState("technique");
+    s.sections = { ...s.sections, pitfalls: "   " };
+    const body = assembleBody(s);
+    expect(body).not.toContain("## Common Pitfalls");
+    expect(body).toContain("## Overview");
+  });
 });
 
 describe("assembleSkill frontmatter", () => {

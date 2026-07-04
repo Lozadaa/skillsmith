@@ -61,6 +61,31 @@ describe("wizardReducer", () => {
     expect(s.disableModelInvocation).toBe(true);
   });
 
+  it("seeds descWhat/descWhen from intent when advancing from step 2 to step 3", () => {
+    let s = {
+      ...initialWizardState,
+      step: 2,
+      intent: { ...initialWizardState.intent, what: "lint skills", when: "the user asks for a lint" },
+    };
+    s = wizardReducer(s, { type: "next" });
+    expect(s.step).toBe(3);
+    expect(s.descWhat).toBe("lint skills");
+    expect(s.descWhen).toBe("the user asks for a lint");
+  });
+
+  it("does not overwrite a user-edited descWhat when advancing to step 3", () => {
+    let s = {
+      ...initialWizardState,
+      step: 2,
+      intent: { ...initialWizardState.intent, what: "lint skills", when: "the user asks for a lint" },
+      descWhat: "already typed by the user",
+    };
+    s = wizardReducer(s, { type: "next" });
+    expect(s.step).toBe(3);
+    expect(s.descWhat).toBe("already typed by the user");
+    expect(s.descWhen).toBe("the user asks for a lint");
+  });
+
   it("setSection updates one section without touching others", () => {
     let s = wizardReducer(initialWizardState, { type: "selectArchetype", archetypeId: "technique" });
     s = wizardReducer(s, { type: "setSection", id: "steps", value: "new steps" });

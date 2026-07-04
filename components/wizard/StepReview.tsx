@@ -22,6 +22,7 @@ export function StepReview({ state }: { state: WizardState }) {
   const findings = outcome.kind === "skill" ? outcome.findings : [];
   const errors = findings.filter((f) => f.severity === "error");
   const score = outcome.kind === "skill" ? outcome.score : null;
+  const exportBlocked = outcome.kind !== "skill" || errors.length > 0;
 
   function openInWorkspace() {
     stashIncomingSkill(files, { dirName, source: "wizard" });
@@ -76,7 +77,7 @@ export function StepReview({ state }: { state: WizardState }) {
         <button
           type="button"
           onClick={download}
-          disabled={errors.length > 0}
+          disabled={exportBlocked}
           data-testid="download-zip"
           className="rounded border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-100 hover:border-neutral-500 disabled:cursor-not-allowed disabled:opacity-40"
         >
