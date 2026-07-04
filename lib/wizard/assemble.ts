@@ -2,6 +2,8 @@ import type { SkillFile } from "@/lib/skill-lint";
 import { getArchetype } from "./archetypes";
 import { buildDescription, type WizardState } from "./state";
 
+export type { WizardState };
+
 /** kebab name -> Title Case for the body H1. */
 function titleFromName(name: string): string {
   const title = name
