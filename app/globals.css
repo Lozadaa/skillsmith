@@ -1,1 +1,165 @@
 @import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Ink workshop tokens — Tailwind 4 CSS-first theme (no tailwind.config.js).
+   Color tokens named --color-* generate bg-/text-/border- utilities.
+   Font tokens named --font-* generate font- utilities and reference the
+   CSS variables that next/font sets on <html> (see app/layout.tsx).
+--------------------------------------------------------------------------- */
+@theme {
+  --color-paper: #fdfcf9;
+  --color-ink: #16130e;
+  --color-ink-soft: #5c564b;
+  --color-ember: #e8590c;
+  --color-ember-deep: #b93e05;
+  --color-severity-error: #c92a2a;
+  --color-severity-warning: #b7791f;
+
+  --font-display: var(--font-im-fell), "Iowan Old Style", Georgia, serif;
+  --font-body: var(--font-alegreya-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Make the humanist body face the default sans for the whole app. */
+  --font-sans: var(--font-alegreya-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+  }
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-paper);
+  }
+  /* Accessibility floor: ember focus ring, offset 2px. */
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Linework system — reusable component classes applied via className.
+   Three wobbly-border radius sets (A/B/C) so panels never look cloned.
+--------------------------------------------------------------------------- */
+@layer components {
+  /* Radius set A */
+  .ink-panel {
+    border: 2px solid var(--color-ink);
+    background-color: var(--color-paper);
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  }
+  /* Radius set B */
+  .ink-panel-b {
+    border: 2px solid var(--color-ink);
+    background-color: var(--color-paper);
+    border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
+  }
+  /* Radius set C */
+  .ink-panel-c {
+    border: 2px solid var(--color-ink);
+    background-color: var(--color-paper);
+    border-radius: 225px 15px 255px 12px / 12px 255px 15px 225px;
+  }
+
+  /* Letterpress button: paper fill, wobbly ink border, hard offset shadow.
+     Hover heats to ember; active presses in; disabled reads as pencil. */
+  .ink-btn {
+    border: 2px solid var(--color-ink);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    border-radius: 255px 12px 225px 12px / 12px 225px 12px 255px;
+    box-shadow: 3px 3px 0 0 var(--color-ink);
+    transition:
+      background-color 120ms ease,
+      color 120ms ease,
+      box-shadow 120ms ease,
+      transform 120ms ease;
+  }
+  .ink-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+    background-color: var(--color-ember);
+    color: var(--color-paper);
+  }
+  .ink-btn:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 0 var(--color-ink);
+    background-color: var(--color-ember-deep);
+    color: var(--color-paper);
+  }
+  .ink-btn:disabled,
+  .ink-btn[aria-disabled="true"] {
+    border-color: var(--color-ink-soft);
+    color: var(--color-ink-soft);
+    background-color: var(--color-paper);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* Sketched card: panel + the only hover motion beyond button presses. */
+  .ink-card {
+    box-shadow: 3px 3px 0 0 var(--color-ink);
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .ink-card:hover {
+    transform: rotate(-0.4deg);
+    box-shadow: 5px 5px 0 0 var(--color-ink);
+  }
+
+  /* Proof-mark stamp: double ink ring around the score. Color set by
+     the caller via `currentColor` (band-driven text color). */
+  .ink-stamp {
+    border: 2px solid currentColor;
+    box-shadow:
+      0 0 0 2px var(--color-paper),
+      0 0 0 4px currentColor;
+    border-radius: 255px 20px 225px 20px / 20px 225px 20px 255px;
+  }
+
+  /* Pen-stroke divider: 2px ink rule with a slight rotation. */
+  .ink-divider {
+    border: none;
+    border-top: 2px solid var(--color-ink);
+    transform: rotate(-0.3deg);
+  }
+
+  /* Hand-stroke underline that draws in on hover, slightly rotated. */
+  .ink-underline {
+    position: relative;
+  }
+  .ink-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 2px;
+    background-color: var(--color-ink);
+    transform: rotate(-0.4deg) scaleX(0);
+    transform-origin: left center;
+    transition: transform 150ms ease;
+  }
+  .ink-underline:hover::after {
+    transform: rotate(-0.4deg) scaleX(1);
+  }
+}
+
+/* Motion restraint: honor reduced-motion for every animated affordance. */
+@media (prefers-reduced-motion: reduce) {
+  .ink-btn,
+  .ink-card,
+  .ink-underline::after {
+    transition: none !important;
+  }
+  .ink-card:hover {
+    transform: none !important;
+  }
+  .ink-underline:hover::after {
+    transform: rotate(-0.4deg) scaleX(1) !important;
+  }
+}
