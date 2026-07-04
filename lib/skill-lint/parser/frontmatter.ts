@@ -8,7 +8,7 @@ export interface ExtractResult {
 }
 
 export function extractFrontmatter(content: string): ExtractResult | null {
-  const src = content.replace(/^﻿/, "");
+  const src = content.replace(/^﻿/, "").replace(/\r\n/g, "\n");
   const lines = src.split("\n");
   if (lines[0]?.trim() !== "---") return null;
 

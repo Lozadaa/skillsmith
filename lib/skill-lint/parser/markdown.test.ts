@@ -28,4 +28,9 @@ describe("parseBody", () => {
   it("counts words", () => {
     expect(parseBody("one two  three\nfour", 1).wordCount).toBe(4);
   });
+
+  it("parses headings in CRLF content", () => {
+    const b = parseBody("# Title\r\n\r\n## Second\r\ntext", 1);
+    expect(b.headings.map((h) => h.text)).toEqual(["Title", "Second"]);
+  });
 });

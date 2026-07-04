@@ -63,4 +63,11 @@ describe("extractFrontmatter", () => {
     expect(r!.frontmatter.parseError).toBeDefined();
     expect(r!.frontmatter.parseError!.line).toBe(3);
   });
+
+  it("parses CRLF frontmatter and body boundary", () => {
+    const r = extractFrontmatter("---\r\nname: crlf-skill\r\ndescription: Use when testing CRLF\r\n---\r\n# Body\r\n");
+    expect(r).not.toBeNull();
+    expect(r!.frontmatter.data["name"]).toBe("crlf-skill");
+    expect(r!.bodyRaw).not.toContain("\r");
+  });
 });

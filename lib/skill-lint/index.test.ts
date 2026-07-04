@@ -65,4 +65,18 @@ describe("lintSkill end to end", () => {
     expect(r.score.value).toBeLessThan(40);
     expect(r.score.band).toBe("poor");
   });
+
+  it("CRLF skills lint identically to LF skills (S07 must not false-fire)", () => {
+    const lf = `---\nname: crlf-check\ndescription: Use when checking line endings\n---\n# T\n\n## Additional Resources\n\n- [api](references/api.md)\n`;
+    const crlf = lf.replace(/\n/g, "\r\n");
+    const mk = (content: string) => [
+      { path: "SKILL.md", content },
+      { path: "references/api.md", content: "ref" },
+    ];
+    const a = lintSkill(mk(lf), { dirName: "crlf-check" });
+    const b = lintSkill(mk(crlf), { dirName: "crlf-check" });
+    if (a.kind !== "skill" || b.kind !== "skill") throw new Error("not a skill");
+    expect(b.findings.map((f) => f.ruleId).sort()).toEqual(a.findings.map((f) => f.ruleId).sort());
+    expect(b.findings.map((f) => f.ruleId)).not.toContain("S07");
+  });
 });

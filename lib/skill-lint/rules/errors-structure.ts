@@ -93,7 +93,7 @@ const e12: Rule = {
             apply(files: SkillFile[]): SkillFile[] {
               return files.map((f) => {
                 if (f.path !== skillPath) return f;
-                const lines = f.content.replace(/^﻿/, "").split("\n");
+                const lines = f.content.replace(/^﻿/, "").replace(/\r\n/g, "\n").split("\n");
                 const closing = lines.findIndex((l, i) => i > 0 && l.trim() === "---");
                 const rebuilt = ["---", fixedRaw, ...lines.slice(closing)].join("\n");
                 return { ...f, content: rebuilt };

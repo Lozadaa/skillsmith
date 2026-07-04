@@ -5,7 +5,8 @@ const HEADING_RE = /^(#{1,6})\s+(.+)$/;
 const MD_LINK_RE = /\[[^\]]*\]\(([^)\s]+)(?:\s[^)]*)?\)/g;
 const BACKTICK_PATH_RE = /`([^`\s]+\/[^`\s]+\.\w+)`/g;
 
-export function parseBody(raw: string, startLine: number): SkillBody {
+export function parseBody(rawInput: string, startLine: number): SkillBody {
+  const raw = rawInput.replace(/\r\n/g, "\n");
   const lines = raw.split("\n");
   const proseLines: { text: string; line: number }[] = [];
   const headings: Heading[] = [];
