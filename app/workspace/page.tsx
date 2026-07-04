@@ -13,6 +13,7 @@ import { ExportButtons } from "@/components/workspace/ExportButtons";
 import { PublishDialog } from "@/components/workspace/PublishDialog";
 import { NotASkillPanel } from "@/components/workspace/NotASkillPanel";
 import { AnalyzeEntry } from "@/components/AnalyzeEntry";
+import { useLocale } from "@/components/LocaleProvider";
 
 function TabButton({
   active,
@@ -37,6 +38,7 @@ function TabButton({
 }
 
 export default function WorkspacePage() {
+  const { t } = useLocale();
   const [profile, setProfile] = useState<Profile>("generic");
   const [tab, setTab] = useState<"findings" | "tokens">("findings");
   const [showOpen, setShowOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function WorkspacePage() {
           <ScoreBadge score={outcome.score} />
         ) : (
           <span className="ink-panel px-3 py-1.5 text-sm font-medium text-severity-warning">
-            Not a skill
+            {t("workspace.notASkillBadge")}
           </span>
         )}
         <ProfileSelect value={profile} onChange={setProfile} />
@@ -67,17 +69,17 @@ export default function WorkspacePage() {
           onClick={() => setShowOpen((v) => !v)}
           className="ink-btn px-3 py-1.5 text-sm"
         >
-          Open…
+          {t("workspace.open")}
         </button>
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
             onClick={() => setShowPublish(true)}
             disabled={hasError}
-            title={hasError ? "Fix every error before publishing" : undefined}
+            title={hasError ? t("workspace.publishGateTitle") : undefined}
             className="ink-btn px-3 py-1.5 text-sm font-medium"
           >
-            Publish to GitHub
+            {t("workspace.publish")}
           </button>
           <ExportButtons files={state.files} dirName={state.dirName} skillName={skillName} hasError={hasError} />
         </div>
@@ -113,7 +115,7 @@ export default function WorkspacePage() {
           <aside className="flex min-h-0 flex-col">
             <div className="flex border-b-2 border-ink">
               <TabButton active={tab === "findings"} onClick={() => setTab("findings")}>
-                Findings
+                {t("workspace.tabs.findings")}
                 {outcome.findings.length > 0 && (
                   <span className="ml-1 rounded-full border border-ink px-1.5 text-xs">
                     {outcome.findings.length}
@@ -121,7 +123,7 @@ export default function WorkspacePage() {
                 )}
               </TabButton>
               <TabButton active={tab === "tokens"} onClick={() => setTab("tokens")}>
-                Tokens
+                {t("workspace.tabs.tokens")}
               </TabButton>
             </div>
             <div className="min-h-0 flex-1 overflow-auto">

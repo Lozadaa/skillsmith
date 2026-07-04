@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
 import { highlightSkillMd, type TokenKind } from "@/lib/highlight";
+import { useLocale } from "@/components/LocaleProvider";
 
 /** Shared font/size/line-height/padding/whitespace so the overlay and the
  *  textarea line up character-for-character. Keep these two class lists
@@ -39,6 +40,7 @@ export function Editor({
   file: SkillFile | undefined;
   onChange: (content: string) => void;
 }) {
+  const { t } = useLocale();
   const preRef = useRef<HTMLPreElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -54,7 +56,7 @@ export function Editor({
   if (!file) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-ink-soft">
-        No file selected.
+        {t("editor.noFile")}
       </div>
     );
   }
@@ -95,7 +97,7 @@ export function Editor({
           onChange={(e) => onChange(e.target.value)}
           onScroll={handleScroll}
           spellCheck={false}
-          aria-label={`Editor for ${file.path}`}
+          aria-label={t("editor.ariaLabel", { path: file.path })}
           className={`${EDITOR_METRICS} absolute inset-0 resize-none bg-transparent text-transparent caret-ink outline-none selection:bg-ink/20 selection:text-transparent`}
         />
       </div>

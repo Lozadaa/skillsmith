@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
 import { downloadBlob, zipSkill } from "@/lib/zip";
+import { useLocale } from "@/components/LocaleProvider";
 
 function btnCls(): string {
   return "ink-btn px-3 py-1.5 text-sm font-medium";
@@ -19,6 +20,7 @@ export function ExportButtons({
   skillName?: string;
   hasError: boolean;
 }) {
+  const { t } = useLocale();
   const dir = ((dirName || skillName || "skill").trim() || "skill").replace(/[^a-zA-Z0-9._-]/g, "-");
   const [copied, setCopied] = useState(false);
 
@@ -41,17 +43,17 @@ export function ExportButtons({
     }
   }
 
-  const gateTitle = hasError ? "Fix every error before exporting a package" : undefined;
+  const gateTitle = hasError ? t("exportButtons.gateTitle") : undefined;
   return (
     <div className="flex items-center gap-2">
       <button type="button" onClick={onZip} disabled={hasError} title={gateTitle} className={btnCls()}>
-        Download .zip
+        {t("exportButtons.zip")}
       </button>
       <button type="button" onClick={onSkill} disabled={hasError} title={gateTitle} className={btnCls()}>
-        Download .skill
+        {t("exportButtons.skill")}
       </button>
       <button type="button" onClick={onCopy} className={btnCls()}>
-        {copied ? "Copied!" : "Copy SKILL.md"}
+        {copied ? t("exportButtons.copied") : t("exportButtons.copy")}
       </button>
     </div>
   );

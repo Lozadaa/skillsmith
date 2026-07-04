@@ -8,16 +8,16 @@ import { StepDescription } from "@/components/wizard/StepDescription";
 import { StepContent } from "@/components/wizard/StepContent";
 import { StepReview } from "@/components/wizard/StepReview";
 import { canAdvance } from "@/lib/wizard/state";
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function NewSkillPage() {
+  const { t } = useLocale();
   const [state, dispatch] = useWizard();
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 text-ink">
-      <h1 className="font-display text-3xl text-ink">Create a skill</h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        Answer a few questions and Skillsmith assembles a spec-compliant skill.
-      </p>
+      <h1 className="font-display text-3xl text-ink">{t("newPage.title")}</h1>
+      <p className="mt-1 text-sm text-ink-soft">{t("newPage.subtitle")}</p>
 
       <div className="mt-6">
         <StepIndicator step={state.step} />
@@ -38,7 +38,7 @@ export default function NewSkillPage() {
           disabled={state.step === 1}
           className="ink-btn px-4 py-2 text-sm"
         >
-          Back
+          {t("newPage.back")}
         </button>
         {state.step < 5 && (
           <button
@@ -47,7 +47,7 @@ export default function NewSkillPage() {
             disabled={!canAdvance(state)}
             className="ink-btn px-4 py-2 text-sm font-medium"
           >
-            Next
+            {t("newPage.next")}
           </button>
         )}
       </div>

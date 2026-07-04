@@ -1,10 +1,12 @@
 "use client";
 import { useMemo, useState } from "react";
 import type { PickerSkill } from "@/lib/github/importFlow";
+import { useLocale } from "@/components/LocaleProvider";
 
 type SortKey = "name" | "score" | "errors";
 
 export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("score");
   const [asc, setAsc] = useState(true); // score ascending = worst first
@@ -35,7 +37,7 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
         onClick={() => setOpen(true)}
         className="ink-btn mb-3 px-3 py-1 text-sm"
       >
-        Audit whole collection ({scanned.length} scanned)
+        {t("collectionAudit.button", { count: scanned.length })}
       </button>
     );
   }
@@ -51,17 +53,17 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
   return (
     <div className="ink-panel mb-4 overflow-x-auto p-3">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="font-display text-lg text-ink">Collection audit — {scanned.length} skills</h2>
+        <h2 className="font-display text-lg text-ink">{t("collectionAudit.title", { count: scanned.length })}</h2>
         <button type="button" onClick={() => setOpen(false)} className="ink-underline text-xs text-ink-soft hover:text-ember-deep">
-          Hide
+          {t("collectionAudit.hide")}
         </button>
       </div>
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b-2 border-ink text-ink-soft">
-            {header("name", "Skill")}
-            {header("score", "Score")}
-            {header("errors", "Errors")}
+            {header("name", t("skillPicker.headers.skill"))}
+            {header("score", t("skillPicker.headers.score"))}
+            {header("errors", t("collectionAudit.headers.errors"))}
           </tr>
         </thead>
         <tbody>

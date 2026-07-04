@@ -5,6 +5,7 @@ import { estimateTokens } from "@/lib/skill-lint";
 import { getArchetype } from "@/lib/wizard/archetypes";
 import { assembleBody, type WizardState } from "@/lib/wizard/assemble";
 import type { WizardAction } from "./useWizard";
+import { useLocale } from "@/components/LocaleProvider";
 
 const CATEGORIES = [
   "Development & Code Tools",
@@ -27,6 +28,7 @@ const fieldClass =
   "mt-1 w-full rounded border-2 border-ink bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-ember";
 
 export function StepContent({ state, dispatch }: { state: WizardState; dispatch: Dispatch<WizardAction> }) {
+  const { t } = useLocale();
   const archetype = getArchetype(state.archetypeId);
   const body = assembleBody(state);
   const lines = body.split("\n").length;
@@ -50,26 +52,26 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
 
       <div className="ink-panel p-4 text-xs">
         <div className="flex flex-wrap gap-4 text-ink-soft">
-          <span data-testid="body-lines">{lines} lines</span>
-          <span>{words} words</span>
-          <span>~{tokens} tokens</span>
+          <span data-testid="body-lines">{t("wizard.content.lines", { count: lines })}</span>
+          <span>{t("wizard.content.words", { count: words })}</span>
+          <span>{t("wizard.content.tokens", { count: tokens })}</span>
         </div>
         {lines > 400 && (
           <p data-testid="body-warn" className="mt-2 text-severity-warning">
-            The body is over 400 lines — move detail into references/ so it loads only when needed.
+            {t("wizard.content.bodyWarn")}
           </p>
         )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium text-ink">Category</span>
+          <span className="text-sm font-medium text-ink">{t("wizard.content.category")}</span>
           <select
             className={fieldClass}
             value={state.category}
             onChange={(e) => dispatch({ type: "setText", field: "category", value: e.target.value })}
           >
-            <option value="">None</option>
+            <option value="">{t("wizard.content.none")}</option>
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -79,7 +81,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-ink">License</span>
+          <span className="text-sm font-medium text-ink">{t("wizard.content.license")}</span>
           <select
             className={fieldClass}
             value={state.license}
@@ -87,14 +89,14 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
           >
             {LICENSES.map((l) => (
               <option key={l} value={l}>
-                {l === "none" ? "None" : l}
+                {l === "none" ? t("wizard.content.none") : l}
               </option>
             ))}
           </select>
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-ink">Version</span>
+          <span className="text-sm font-medium text-ink">{t("wizard.content.version")}</span>
           <input
             className={fieldClass}
             value={state.version}
@@ -108,7 +110,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
             checked={state.disableModelInvocation}
             onChange={(e) => dispatch({ type: "toggle", field: "disableModelInvocation", value: e.target.checked })}
           />
-          <span className="text-sm text-ink">User-invoked only (disable-model-invocation)</span>
+          <span className="text-sm text-ink">{t("wizard.content.userInvokedOnly")}</span>
         </label>
       </div>
     </div>

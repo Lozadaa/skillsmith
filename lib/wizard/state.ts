@@ -4,7 +4,6 @@ import { validateName } from "./name";
 export interface WizardIntent {
   what: string;
   when: string;
-  output: string;
   distribution: string;
 }
 
@@ -26,7 +25,7 @@ export interface WizardState {
 
 export const initialWizardState: WizardState = {
   step: 1,
-  intent: { what: "", when: "", output: "", distribution: "personal" },
+  intent: { what: "", when: "", distribution: "personal" },
   archetypeId: null,
   name: "",
   descWhat: "",

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IM_Fell_English, Alegreya_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
+import { LocaleProvider } from "@/components/LocaleProvider";
 
 // Self-hosted at build by next/font — no runtime request to Google.
 const display = IM_Fell_English({
@@ -35,8 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="min-h-screen bg-paper text-ink antialiased">
-        <SiteHeader />
-        {children}
+        <LocaleProvider>
+          <SiteHeader />
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   );

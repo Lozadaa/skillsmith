@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/components/LocaleProvider";
 import { stashIncomingSkill } from "@/lib/handoff";
 import { createClient, GitHubError, type GitHubClient, type UserRepo } from "@/lib/github/client";
 import { parseGitHubUrl } from "@/lib/github/url";
@@ -31,6 +32,7 @@ export interface ImportAppProps {
 
 export default function ImportApp({ createClientFn = createClient }: ImportAppProps) {
   const router = useRouter();
+  const { t } = useLocale();
   const [url, setUrl] = useState("");
   const [token, setToken] = useState("");
   const [view, setView] = useState<View>({ s: "idle" });
@@ -121,10 +123,10 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
   async function run(inputUrl: string) {
     const target = parseGitHubUrl(inputUrl);
     if (!target) {
-      setView({ s: "error", error: new Error("That doesn't look like a GitHub repo, gist, or owner/repo.") });
+      setView({ s: "error", error: new Error(t("import.error.notGithub")) });
       return;
     }
-    setView({ s: "loading", step: "Resolving…" });
+    setView({ s: "loading", step: t("import.loading.resolving") });
     try {
       const result = await resolveTarget(makeClient(), target, (step) => setView({ s: "loading", step }));
       setView({ s: "result", result });
@@ -148,7 +150,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
 
   async function downloadAll(result: Extract<ImportResult, { mode: "picker" }>) {
     setBusyDir("__bulk__");
-    setBulk({ running: true, step: "Preparing…" });
+    setBulk({ running: true, step: t("import.picker.preparing") });
     try {
       const refs = result.skills.map((s) => s.ref);
       const { zips, skipped } = await fetchAllSkills(
@@ -165,7 +167,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         running: false,
         step:
           skipped.length > 0
-            ? `Done — ${zips.length} skills downloaded, ${skipped.length} item(s) skipped.`
+            ? t("import.picker.doneSummary", { count: zips.length, skipped: skipped.length })
             : "",
       });
     } catch (error) {
@@ -188,8 +190,8 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="font-display text-3xl text-ink">Import a skill from GitHub</h1>
-      <p className="mt-1 text-sm text-ink-soft">Paste a repo, gist, or owner/repo. Everything runs in your browser.</p>
+      <h1 className="font-display text-3xl text-ink">{t("import.title")}</h1>
+      <p className="mt-1 text-sm text-ink-soft">{t("import.subtitle")}</p>
 
       <form
         className="mt-4"
@@ -199,18 +201,18 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         }}
       >
         <label htmlFor="repo-url" className="block text-sm font-medium text-ink">
-          Repository URL
+          {t("import.form.label")}
         </label>
         <div className="mt-1 flex gap-2">
           <input
             id="repo-url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://github.com/owner/repo"
+            placeholder={t("import.form.placeholder")}
             className="flex-1 rounded border-2 border-ink bg-paper px-3 py-2 text-ink outline-none focus:border-ember"
           />
           <button type="submit" className="ink-btn px-4 py-2 font-medium">
-            Import
+            {t("import.form.submit")}
           </button>
         </div>
         <TokenField token={token} onChange={updateToken} open={tokenOpen} onToggle={setTokenOpen} />
@@ -253,32 +255,39 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
           <p className="text-sm text-ink-soft">{view.result.reason}</p>
         )}
 
-        {view.s === "result" && view.result.mode === "gist" && (
-          <div className="ink-panel p-4">
-            <p className="text-sm text-ink">
-              Gist skill <span className="font-medium">{view.result.dirName}</span> — score{" "}
-              {view.result.lint.ok ? view.result.lint.score : "n/a"}.
-            </p>
-            <button
-              type="button"
-              onClick={() => openGist(view.result as Extract<ImportResult, { mode: "gist" }>)}
-              className="ink-btn mt-2 px-3 py-1 text-sm"
-            >
-              Open
-            </button>
-          </div>
-        )}
+        {view.s === "result" && view.result.mode === "gist" && (() => {
+          const [gistBefore, gistAfter] = t("import.gist.label", {
+            score: view.result.lint.ok ? view.result.lint.score : "n/a",
+          }).split("{dirName}");
+          return (
+            <div className="ink-panel p-4">
+              <p className="text-sm text-ink">
+                {gistBefore}
+                <span className="font-medium">{view.result.dirName}</span>
+                {gistAfter}
+              </p>
+              <button
+                type="button"
+                onClick={() => openGist(view.result as Extract<ImportResult, { mode: "gist" }>)}
+                className="ink-btn mt-2 px-3 py-1 text-sm"
+              >
+                {t("skillPicker.open")}
+              </button>
+            </div>
+          );
+        })()}
 
         {view.s === "result" && view.result.mode === "picker" && (
           <div>
             {view.result.truncated && (
               <div className="ink-panel mb-3 p-3 text-sm text-severity-warning">
-                This repository is very large; GitHub truncated the file tree, so these results are partial. Import a
-                subfolder URL (…/tree/main/path) for complete results.
+                {t("import.picker.truncated")}
               </div>
             )}
             <p className="mb-2 text-sm text-ink-soft">
-              Found {view.result.skills.length} skill{view.result.skills.length === 1 ? "" : "s"}.
+              {t(view.result.skills.length === 1 ? "import.picker.found.singular" : "import.picker.found.plural", {
+                count: view.result.skills.length,
+              })}
             </p>
             {view.result.skills.length > 3 && <CollectionAudit skills={view.result.skills} />}
             {view.result.skills.length >= 2 && (
@@ -289,7 +298,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
                   onClick={() => view.result.mode === "picker" && downloadAll(view.result)}
                   className="ink-btn px-3 py-1 text-sm"
                 >
-                  {bulk.running ? "Downloading…" : "Download all (.zip)"}
+                  {bulk.running ? t("import.picker.downloading") : t("import.picker.downloadAll")}
                 </button>
                 {bulk.step && <span className="text-sm text-ink-soft">{bulk.step}</span>}
               </div>

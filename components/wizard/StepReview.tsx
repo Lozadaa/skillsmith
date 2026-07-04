@@ -7,6 +7,7 @@ import { assembleSkill } from "@/lib/wizard/assemble";
 import type { WizardState } from "@/lib/wizard/state";
 import { stashIncomingSkill } from "@/lib/handoff";
 import { zipSkill, downloadBlob } from "@/lib/zip";
+import { useLocale } from "@/components/LocaleProvider";
 
 const SEVERITY_COLOR: Record<string, string> = {
   error: "text-severity-error",
@@ -15,6 +16,7 @@ const SEVERITY_COLOR: Record<string, string> = {
 };
 
 export function StepReview({ state }: { state: WizardState }) {
+  const { t } = useLocale();
   const router = useRouter();
   const { files, dirName } = useMemo(() => assembleSkill(state), [state]);
   const outcome = useMemo(() => lintSkill(files, { dirName }), [files, dirName]);
@@ -38,22 +40,22 @@ export function StepReview({ state }: { state: WizardState }) {
     <div className="space-y-6">
       <div className="ink-panel flex items-center justify-between p-4">
         <div>
-          <p className="text-sm text-ink-soft">Lint score</p>
+          <p className="text-sm text-ink-soft">{t("wizard.review.lintScore")}</p>
           <p className="font-display text-3xl text-ink">
             {score ? `${score.value}/100` : "—"}
             {score && <span className="ml-2 text-sm font-normal text-ink-soft">{score.band}</span>}
           </p>
         </div>
         <div className="text-right text-xs text-ink-soft">
-          <p>{files.length} file(s)</p>
-          <p>{dirName || "unnamed"}/</p>
+          <p>{t("wizard.review.filesCount", { count: files.length })}</p>
+          <p>{dirName || t("wizard.review.unnamed")}/</p>
         </div>
       </div>
 
       <div className="ink-panel p-4">
-        <p className="mb-2 text-sm font-medium text-ink">Findings</p>
+        <p className="mb-2 text-sm font-medium text-ink">{t("wizard.review.findings")}</p>
         {findings.length === 0 ? (
-          <p className="text-sm text-ink-soft">No findings — the skill is clean.</p>
+          <p className="text-sm text-ink-soft">{t("wizard.review.noFindings")}</p>
         ) : (
           <ul className="space-y-2 text-xs">
             {findings.map((f, i) => (
@@ -72,7 +74,7 @@ export function StepReview({ state }: { state: WizardState }) {
           onClick={openInWorkspace}
           className="ink-btn px-4 py-2 text-sm font-medium"
         >
-          Open in Workspace
+          {t("wizard.review.openWorkspace")}
         </button>
         <button
           type="button"
@@ -81,12 +83,11 @@ export function StepReview({ state }: { state: WizardState }) {
           data-testid="download-zip"
           className="ink-btn px-4 py-2 text-sm font-medium"
         >
-          Download .zip
+          {t("exportButtons.zip")}
         </button>
         {errors.length > 0 && (
           <p className="w-full text-xs text-severity-error">
-            Fix the {errors.length} error finding(s) to enable download. You can still open the draft in the
-            workspace to iterate.
+            {t("wizard.review.fixErrors", { count: errors.length })}
           </p>
         )}
       </div>

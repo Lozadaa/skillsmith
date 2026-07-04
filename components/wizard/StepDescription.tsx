@@ -5,6 +5,7 @@ import { estimateTokens } from "@/lib/skill-lint";
 import { buildDescription, type WizardState } from "@/lib/wizard/state";
 import type { WizardAction } from "./useWizard";
 import { NameField } from "./NameField";
+import { useLocale } from "@/components/LocaleProvider";
 
 const fieldClass =
   "mt-1 w-full rounded border-2 border-ink bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-ember";
@@ -14,6 +15,7 @@ const fieldClass =
 const PERSON_RE = /\b(I can|I will|I'll|you can|you should|you need|use this skill when you)\b/i;
 
 export function StepDescription({ state, dispatch }: { state: WizardState; dispatch: Dispatch<WizardAction> }) {
+  const { t } = useLocale();
   const set = (field: "descWhat" | "descWhen" | "descTriggers" | "descNegative", value: string) =>
     dispatch({ type: "setText", field, value });
 
@@ -30,40 +32,40 @@ export function StepDescription({ state, dispatch }: { state: WizardState; dispa
       <NameField value={state.name} onChange={(v) => dispatch({ type: "setText", field: "name", value: v })} />
 
       <label className="block">
-        <span className="text-sm font-medium text-ink">What it does</span>
+        <span className="text-sm font-medium text-ink">{t("wizard.description.what.label")}</span>
         <input
           className={fieldClass}
-          placeholder="Generates release notes from a changelog"
+          placeholder={t("wizard.description.what.placeholder")}
           value={state.descWhat}
           onChange={(e) => set("descWhat", e.target.value)}
         />
       </label>
 
       <label className="block">
-        <span className="text-sm font-medium text-ink">When to use it</span>
+        <span className="text-sm font-medium text-ink">{t("wizard.description.when.label")}</span>
         <input
           className={fieldClass}
-          placeholder="a changelog or merged-PR list needs a readable release note"
+          placeholder={t("wizard.description.when.placeholder")}
           value={state.descWhen}
           onChange={(e) => set("descWhen", e.target.value)}
         />
       </label>
 
       <label className="block">
-        <span className="text-sm font-medium text-ink">Concrete trigger phrases (quoted)</span>
+        <span className="text-sm font-medium text-ink">{t("wizard.description.triggers.label")}</span>
         <input
           className={fieldClass}
-          placeholder={'"write release notes", "summarize the changelog"'}
+          placeholder={t("wizard.description.triggers.placeholder")}
           value={state.descTriggers}
           onChange={(e) => set("descTriggers", e.target.value)}
         />
       </label>
 
       <label className="block">
-        <span className="text-sm font-medium text-ink">Negative triggers (optional)</span>
+        <span className="text-sm font-medium text-ink">{t("wizard.description.negative.label")}</span>
         <input
           className={fieldClass}
-          placeholder="writing marketing copy or blog posts"
+          placeholder={t("wizard.description.negative.placeholder")}
           value={state.descNegative}
           onChange={(e) => set("descNegative", e.target.value)}
         />
@@ -71,12 +73,12 @@ export function StepDescription({ state, dispatch }: { state: WizardState; dispa
 
       <div className="ink-panel p-4">
         <div className="flex items-center justify-between text-xs">
-          <span className="font-medium text-ink">Assembled description</span>
+          <span className="font-medium text-ink">{t("wizard.description.assembled")}</span>
           <span className="flex gap-3">
             <span data-testid="desc-char-counter" className={counterClass}>
-              {len}/1024 chars
+              {t("wizard.description.charCounter", { count: len })}
             </span>
-            <span className="text-ink-soft">~{estimateTokens(description)} tokens</span>
+            <span className="text-ink-soft">{t("wizard.content.tokens", { count: estimateTokens(description) })}</span>
           </span>
         </div>
         <p data-testid="desc-preview" className="mt-2 text-sm text-ink">
@@ -84,23 +86,23 @@ export function StepDescription({ state, dispatch }: { state: WizardState; dispa
         </p>
         {overWarn && !overHard && (
           <p data-testid="desc-warn" className="mt-2 text-xs text-severity-warning">
-            Long descriptions dilute triggering — aim for under 500 characters.
+            {t("wizard.description.warnLong")}
           </p>
         )}
         {overHard && (
           <p data-testid="desc-error" className="mt-2 text-xs text-severity-error">
-            Over the 1024-character hard limit — the skill will be rejected. Trim it.
+            {t("wizard.description.errorHardLimit")}
           </p>
         )}
         {hasPerson && (
           <p data-testid="desc-person-hint" className="mt-2 text-xs text-severity-warning">
-            Prefer third-person, imperative phrasing over &ldquo;I can&rdquo; / &ldquo;you can&rdquo;.
+            {t("wizard.description.personHint")}
           </p>
         )}
       </div>
 
       <div className="ink-panel p-4">
-        <p className="text-xs font-medium text-ink-soft">How the agent sees it</p>
+        <p className="text-xs font-medium text-ink-soft">{t("wizard.description.agentView")}</p>
         <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded bg-ink/5 p-3 font-mono text-xs text-ink">
 {`name: ${state.name || "your-skill-name"}
 description: ${description}`}

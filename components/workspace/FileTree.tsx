@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
+import { useLocale } from "@/components/LocaleProvider";
 
 export function FileTree({
   files,
@@ -16,6 +17,7 @@ export function FileTree({
   onAdd: (path: string) => void;
   onDelete: (path: string) => void;
 }) {
+  const { t } = useLocale();
   const [draft, setDraft] = useState("");
 
   function submit(e: React.FormEvent) {
@@ -47,7 +49,7 @@ export function FileTree({
               {f.path !== "SKILL.md" && (
                 <button
                   type="button"
-                  aria-label={`Delete ${f.path}`}
+                  aria-label={t("fileTree.deleteAria", { path: f.path })}
                   onClick={() => onDelete(f.path)}
                   className="ml-1 px-1 text-ink-soft opacity-0 hover:text-severity-error focus:opacity-100 group-hover:opacity-100"
                 >
@@ -61,8 +63,8 @@ export function FileTree({
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="add file e.g. references/api.md"
-          aria-label="New file path"
+          placeholder={t("fileTree.addPlaceholder")}
+          aria-label={t("fileTree.newFileAria")}
           className="w-full rounded border-2 border-ink bg-paper px-2 py-1 font-mono text-xs text-ink placeholder:text-ink-soft/60"
         />
       </form>

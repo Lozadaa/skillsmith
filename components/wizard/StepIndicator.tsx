@@ -1,8 +1,18 @@
 "use client";
 
-const STEPS = ["Intent", "Archetype", "Description", "Content", "Review"];
+import { useLocale } from "@/components/LocaleProvider";
+
+const STEP_KEYS = [
+  "wizard.steps.intent",
+  "wizard.steps.archetype",
+  "wizard.steps.description",
+  "wizard.steps.content",
+  "wizard.steps.review",
+];
 
 export function StepIndicator({ step }: { step: number }) {
+  const { t } = useLocale();
+  const STEPS = STEP_KEYS.map((key) => t(key));
   return (
     <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs">
       {STEPS.map((label, i) => {

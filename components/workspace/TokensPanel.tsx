@@ -1,6 +1,7 @@
 "use client";
 
 import type { TokenReport } from "@/lib/skill-lint";
+import { useLocale } from "@/components/LocaleProvider";
 
 interface Row {
   key: string;
@@ -11,43 +12,42 @@ interface Row {
 }
 
 export function TokensPanel({ tokens }: { tokens: TokenReport }) {
+  const { t } = useLocale();
   const rows: Row[] = [
     {
       key: "metadata",
-      label: "Metadata (name + description)",
+      label: t("tokensPanel.metadata.label"),
       value: tokens.metadata,
       unit: "tokens",
-      note: "Loaded into every conversation — the most expensive tokens you own.",
+      note: t("tokensPanel.metadata.note"),
     },
     {
       key: "body",
-      label: "SKILL.md body",
+      label: t("tokensPanel.body.label"),
       value: tokens.body,
       unit: "tokens",
-      note: "Loaded only when the skill triggers.",
+      note: t("tokensPanel.body.note"),
     },
     {
       key: "references",
-      label: "references/ files",
+      label: t("tokensPanel.references.label"),
       value: tokens.references,
       unit: "tokens",
-      note: "Zero cost until the agent opens them — moving content here is free.",
+      note: t("tokensPanel.references.note"),
     },
     {
       key: "scripts",
-      label: "scripts/ files",
+      label: t("tokensPanel.scripts.label"),
       value: tokens.scriptFiles,
       unit: "files",
-      note: "Executed, never loaded — only their output consumes context.",
+      note: t("tokensPanel.scripts.note"),
     },
   ];
   const maxTokens = Math.max(1, tokens.metadata, tokens.body, tokens.references);
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <p className="text-xs text-ink-soft">
-        ~estimated — Anthropic does not publish the Claude 3+ tokenizer, so these are heuristic counts.
-      </p>
+      <p className="text-xs text-ink-soft">{t("tokensPanel.estimateNote")}</p>
       <ul className="flex flex-col gap-4">
         {rows.map((r) => {
           const pct = r.unit === "tokens" ? Math.round((r.value / maxTokens) * 100) : 0;
@@ -56,7 +56,12 @@ export function TokensPanel({ tokens }: { tokens: TokenReport }) {
               <div className="flex items-baseline justify-between text-sm">
                 <span className="text-ink">{r.label}</span>
                 <span className="font-mono text-ink-soft">
-                  {r.value} {r.unit === "tokens" ? "tok" : r.value === 1 ? "file" : "files"}
+                  {r.value}{" "}
+                  {r.unit === "tokens"
+                    ? t("tokensPanel.unit.tok")
+                    : r.value === 1
+                      ? t("tokensPanel.unit.file")
+                      : t("tokensPanel.unit.files")}
                 </span>
               </div>
               {r.unit === "tokens" && (
@@ -70,8 +75,10 @@ export function TokensPanel({ tokens }: { tokens: TokenReport }) {
         })}
       </ul>
       <div className="flex items-baseline justify-between border-t-2 border-ink pt-3 text-sm">
-        <span className="font-medium text-ink">Total context (metadata + body + references)</span>
-        <span className="font-mono text-ink">{tokens.total} tok</span>
+        <span className="font-medium text-ink">{t("tokensPanel.total")}</span>
+        <span className="font-mono text-ink">
+          {tokens.total} {t("tokensPanel.unit.tok")}
+        </span>
       </div>
     </div>
   );

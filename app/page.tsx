@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/components/LocaleProvider";
 
 type IconName = "anvil" | "hammer" | "crate";
 
@@ -64,29 +67,27 @@ function FeatureCard({
 }
 
 export default function Home() {
+  const { t } = useLocale();
   return (
     <main className="mx-auto max-w-5xl px-6 py-16">
       <section className="grid items-center gap-10 md:grid-cols-[1fr_45%]">
         <div>
           <h1 className="font-display text-5xl leading-tight text-ink sm:text-6xl">
-            Forge better skills.
+            {t("home.hero.title")}
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-ink-soft">
-            Skillsmith is the smith&apos;s bench for Claude Agent Skills — inspect, temper and ship a
-            spec-clean SKILL.md, entirely in your browser.
-          </p>
+          <p className="mt-5 max-w-xl text-lg text-ink-soft">{t("home.hero.subtitle")}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/workspace" className="ink-btn px-5 py-2.5 font-medium">
-              Open the workshop
+              {t("home.hero.cta.workspace")}
             </Link>
             <Link href="/new" className="ink-btn px-5 py-2.5 font-medium">
-              Start forging
+              {t("home.hero.cta.new")}
             </Link>
           </div>
         </div>
         <div
           role="img"
-          aria-label="A blacksmith hammering hot metal on an anvil — hand-drawn ink animation."
+          aria-label={t("home.hero.imgAlt")}
           className="ink-hero-img ink-forge w-full max-w-md justify-self-center md:justify-self-end"
         />
       </section>
@@ -95,27 +96,27 @@ export default function Home() {
 
       <section className="grid gap-5 sm:grid-cols-3">
         <FeatureCard
-          title="Inspect"
+          title={t("home.card.inspect.title")}
           href="/workspace"
           icon="anvil"
-          body="Paste, upload or drop a SKILL.md and get instant findings, a proof-mark score and a token breakdown."
+          body={t("home.card.inspect.body")}
         />
         <FeatureCard
-          title="Forge"
+          title={t("home.card.forge.title")}
           href="/new"
           icon="hammer"
-          body="A guided wizard turns your intent into a valid, well-formed skill from real-world archetypes."
+          body={t("home.card.forge.body")}
         />
         <FeatureCard
-          title="Import"
+          title={t("home.card.import.title")}
           href="/import"
           icon="crate"
-          body="Paste any GitHub repo URL to detect its skills and load one straight onto the bench."
+          body={t("home.card.import.body")}
         />
       </section>
 
       <footer className="mt-20 border-t-2 border-ink pt-6 text-center text-sm text-ink-soft">
-        Static, private, no account. All analysis runs in your browser.
+        {t("home.footer")}
       </footer>
     </main>
   );

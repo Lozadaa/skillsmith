@@ -5,6 +5,8 @@ import type { SkillFile } from "@/lib/skill-lint";
 import { createClient, GitHubError, NotFoundError, RateLimitError, type UserRepo } from "@/lib/github/client";
 import { parseGitHubUrl } from "@/lib/github/url";
 import { publishSkill, type PublishTarget } from "@/lib/github/publish";
+import { useLocale } from "@/components/LocaleProvider";
+import { STRINGS } from "@/lib/i18n";
 
 const TOKEN_KEY = "skillsmith:gh-pat";
 
@@ -24,11 +26,11 @@ type State =
   | { s: "done"; htmlUrl: string; skipped: string[] }
   | { s: "error"; message: string };
 
-function friendlyError(e: unknown): string {
-  if (e instanceof RateLimitError) return "GitHub rate limit reached — wait a moment or use a token with more quota.";
-  if (e instanceof NotFoundError) return "Repository not found — check the owner/repo and that your token can access it.";
+function friendlyError(e: unknown, t: (key: string) => string): string {
+  if (e instanceof RateLimitError) return t("publishDialog.error.rateLimit");
+  if (e instanceof NotFoundError) return t("publishDialog.error.notFound");
   if (e instanceof GitHubError) return e.message;
-  return e instanceof Error ? e.message : "Something went wrong while publishing.";
+  return e instanceof Error ? e.message : t("publishDialog.error.generic");
 }
 
 export function PublishDialog({
@@ -39,6 +41,13 @@ export function PublishDialog({
   publishFn = publishSkill,
   createClientFn = createClient,
 }: PublishDialogProps) {
+  const { t, locale } = useLocale();
+  // "Published to {url}." wraps a clickable <a> around the URL segment — split
+  // the template on the placeholder so the link keeps its own DOM node instead
+  // of being flattened into plain text.
+  const [publishedPrefix, publishedSuffix] = (
+    STRINGS[locale]?.["publishDialog.published"] ?? STRINGS.en["publishDialog.published"]
+  ).split("{url}");
   const [token, setToken] = useState("");
   const [mode, setMode] = useState<Mode>("new-repo");
   const [repoName, setRepoName] = useState(dirName);
@@ -106,12 +115,12 @@ export function PublishDialog({
   function buildTarget(): PublishTarget | { error: string } {
     if (mode === "new-repo") {
       const name = repoName.trim();
-      if (!name) return { error: "Enter a name for the new repository." };
+      if (!name) return { error: t("publishDialog.error.nameRequired") };
       return { mode: "new-repo", name, isPrivate };
     }
     const parsed = parseGitHubUrl(ownerRepo.trim());
     if (!parsed || parsed.kind !== "repo") {
-      return { error: "Enter the target as owner/repo or a GitHub repository URL." };
+      return { error: t("publishDialog.error.ownerRepoRequired") };
     }
     return {
       mode: "existing",
@@ -129,7 +138,7 @@ export function PublishDialog({
       return;
     }
     if (!token.trim()) {
-      setState({ s: "error", message: "A token with repo scope is required to publish." });
+      setState({ s: "error", message: t("publishDialog.error.tokenRequired") });
       return;
     }
     setState({ s: "publishing" });
@@ -143,25 +152,25 @@ export function PublishDialog({
       });
       setState({ s: "done", htmlUrl: res.htmlUrl, skipped: res.skipped });
     } catch (e) {
-      setState({ s: "error", message: friendlyError(e) });
+      setState({ s: "error", message: friendlyError(e, t) });
     }
   }
 
   const publishing = state.s === "publishing";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" role="dialog" aria-modal="true" aria-label="Publish to GitHub">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" role="dialog" aria-modal="true" aria-label={t("publishDialog.title")}>
       <div className="ink-panel-b w-full max-w-lg p-5 text-ink">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg">Publish to GitHub</h2>
+          <h2 className="font-display text-lg">{t("publishDialog.title")}</h2>
           <button type="button" onClick={onClose} className="text-ink-soft hover:text-ink">
-            Close
+            {t("publishDialog.close")}
           </button>
         </div>
 
         <div className="mt-4 flex flex-col gap-1">
           <label htmlFor="pub-token" className="text-sm text-ink-soft">
-            Personal access token
+            {t("publishDialog.tokenLabel")}
           </label>
           <input
             id="pub-token"
@@ -172,24 +181,24 @@ export function PublishDialog({
             autoComplete="off"
             className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
           />
-          <span className="text-xs text-ink-soft">Needs a token with repo scope — stored locally only, never sent anywhere but github.com.</span>
+          <span className="text-xs text-ink-soft">{t("publishDialog.tokenNote")}</span>
         </div>
 
         <fieldset className="mt-4">
-          <legend className="text-sm text-ink-soft">Destination</legend>
+          <legend className="text-sm text-ink-soft">{t("publishDialog.destinationLegend")}</legend>
           <label className="mt-1 flex items-center gap-2 text-sm text-ink">
             <input type="radio" name="pub-mode" checked={mode === "new-repo"} onChange={() => setMode("new-repo")} />
-            New repository
+            {t("publishDialog.newRepo")}
           </label>
           <label className="mt-1 flex items-center gap-2 text-sm text-ink">
-            <input type="radio" name="pub-mode" aria-label="Existing repository" checked={mode === "existing"} onChange={() => setMode("existing")} />
-            Existing repository
+            <input type="radio" name="pub-mode" aria-label={t("publishDialog.existingRepo")} checked={mode === "existing"} onChange={() => setMode("existing")} />
+            {t("publishDialog.existingRepo")}
           </label>
         </fieldset>
 
         {mode === "new-repo" ? (
           <div className="mt-3 flex flex-col gap-2">
-            <label htmlFor="pub-name" className="text-sm text-ink-soft">Repository name</label>
+            <label htmlFor="pub-name" className="text-sm text-ink-soft">{t("publishDialog.repoNameLabel")}</label>
             <input
               id="pub-name"
               value={repoName}
@@ -198,18 +207,18 @@ export function PublishDialog({
             />
             <label className="flex items-center gap-2 text-sm text-ink">
               <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
-              Private repository
+              {t("publishDialog.privateRepo")}
             </label>
             {me && (
               <p className="text-xs text-ink-soft">
-                Will create github.com/{me.login}/{repoName.trim() || "…"}
+                {t("publishDialog.willCreate", { login: me.login, repo: repoName.trim() || "…" })}
               </p>
             )}
           </div>
         ) : (
           <div className="mt-3 flex flex-col gap-2">
             <label htmlFor="pub-repo" className="text-sm text-ink-soft">
-              owner/repo{repos.length > 0 && " (autocompletes from your repos when signed in)"}
+              {t("publishDialog.ownerRepoLabel")}{repos.length > 0 && t("publishDialog.autocompleteHint")}
             </label>
             <input
               id="pub-repo"
@@ -227,7 +236,7 @@ export function PublishDialog({
                 ))}
               </datalist>
             )}
-            <label htmlFor="pub-branch" className="text-sm text-ink-soft">Branch (optional — defaults to the repo default)</label>
+            <label htmlFor="pub-branch" className="text-sm text-ink-soft">{t("publishDialog.branchLabel")}</label>
             <input
               id="pub-branch"
               value={branch}
@@ -235,19 +244,19 @@ export function PublishDialog({
               placeholder="main"
               className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
-            <label htmlFor="pub-prefix" className="text-sm text-ink-soft">Path prefix</label>
+            <label htmlFor="pub-prefix" className="text-sm text-ink-soft">{t("publishDialog.pathPrefixLabel")}</label>
             <input
               id="pub-prefix"
               value={pathPrefix}
               onChange={(e) => setPathPrefix(e.target.value)}
               className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
-            <span className="text-xs text-ink-soft">Files already at this path will be replaced by this commit.</span>
+            <span className="text-xs text-ink-soft">{t("publishDialog.overwriteNote")}</span>
           </div>
         )}
 
         <div className="mt-3 flex flex-col gap-1">
-          <label htmlFor="pub-message" className="text-sm text-ink-soft">Commit message</label>
+          <label htmlFor="pub-message" className="text-sm text-ink-soft">{t("publishDialog.commitMessageLabel")}</label>
           <input
             id="pub-message"
             value={message}
@@ -263,9 +272,9 @@ export function PublishDialog({
             disabled={publishing}
             className="ink-btn px-4 py-1.5 text-sm font-medium"
           >
-            {publishing ? "Publishing…" : "Publish"}
+            {publishing ? t("publishDialog.publishing") : t("publishDialog.publish")}
           </button>
-          {publishing && <span className="text-sm text-ink-soft">Creating commit…</span>}
+          {publishing && <span className="text-sm text-ink-soft">{t("publishDialog.creatingCommit")}</span>}
         </div>
 
         {state.s === "error" && (
@@ -274,14 +283,14 @@ export function PublishDialog({
         {state.s === "done" && (
           <div className="mt-3 rounded border-2 border-ink px-3 py-2 text-sm text-ink">
             <p>
-              Published to{" "}
+              {publishedPrefix}
               <a href={state.htmlUrl} target="_blank" rel="noreferrer" className="underline">
                 {state.htmlUrl.replace(/^https?:\/\//, "")}
               </a>
-              .
+              {publishedSuffix}
             </p>
             {state.skipped.length > 0 && (
-              <p className="mt-1 text-ink-soft">Skipped {state.skipped.length} symlink file(s): {state.skipped.join(", ")}</p>
+              <p className="mt-1 text-ink-soft">{t("publishDialog.skippedSymlinks", { count: state.skipped.length, list: state.skipped.join(", ") })}</p>
             )}
           </div>
         )}

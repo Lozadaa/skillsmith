@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
 import { unzipSkill } from "@/lib/zip";
+import { useLocale } from "@/components/LocaleProvider";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024; // spec §11
 
@@ -25,6 +26,7 @@ function rootFromArchiveName(name: string): string | undefined {
 }
 
 export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => void }) {
+  const { t } = useLocale();
   const [paste, setPaste] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -62,19 +64,19 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
     // Single .zip / .skill → unzip.
     if (arr.length === 1 && /\.(zip|skill)$/i.test(arr[0].name)) {
       if (arr[0].size > MAX_FILE_BYTES) {
-        setError("That archive is over 2 MB.");
+        setError(t("analyzeEntry.error.archiveTooBig"));
         return;
       }
       try {
         const bytes = new Uint8Array(await arr[0].arrayBuffer());
         const files = unzipSkill(bytes);
         if (files.length === 0) {
-          setError("That archive contained no readable files.");
+          setError(t("analyzeEntry.error.archiveEmpty"));
           return;
         }
         onSkill({ files, dirName: rootFromArchiveName(arr[0].name) });
       } catch (e) {
-        setError("Could not read that archive.");
+        setError(t("analyzeEntry.error.archiveUnreadable"));
         console.warn(e);
       }
       return;
@@ -84,13 +86,13 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
     try {
       const { files, dirName, rejected } = await readPlainFiles(arr);
       if (files.length === 0) {
-        setError(rejected > 0 ? "Every file was over 2 MB." : "No readable files found.");
+        setError(rejected > 0 ? t("analyzeEntry.error.allTooBig") : t("analyzeEntry.error.noReadable"));
         return;
       }
-      if (rejected > 0) setError(`Skipped ${rejected} file(s) over 2 MB.`);
+      if (rejected > 0) setError(t("analyzeEntry.error.skipped", { count: rejected }));
       onSkill({ files, dirName });
     } catch (e) {
-      setError("Could not read those files.");
+      setError(t("analyzeEntry.error.filesUnreadable"));
       console.warn(e);
     }
   }
@@ -99,13 +101,13 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
     <div className="grid gap-4 md:grid-cols-2">
       <div className="flex flex-col">
         <label htmlFor="analyze-paste" className="mb-1 text-sm font-medium text-ink">
-          Paste a SKILL.md
+          {t("analyzeEntry.pasteLabel")}
         </label>
         <textarea
           id="analyze-paste"
           value={paste}
           onChange={(e) => setPaste(e.target.value)}
-          placeholder={"---\nname: my-skill\ndescription: Use when …\n---\n# Body"}
+          placeholder={t("analyzeEntry.placeholder")}
           className="ink-panel h-40 w-full resize-none p-3 font-mono text-xs text-ink outline-none placeholder:text-ink-soft/60"
         />
         <button
@@ -114,7 +116,7 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           disabled={!paste.trim()}
           className="ink-btn mt-2 self-start px-3 py-1.5 text-sm font-medium"
         >
-          Analyze
+          {t("analyzeEntry.analyze")}
         </button>
       </div>
 
@@ -133,21 +135,21 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           dragging ? "border-ember bg-ember/5" : "border-ink-soft"
         }`}
       >
-        <p className="text-sm text-ink-soft">Drop a folder or a .zip / .skill here, or</p>
+        <p className="text-sm text-ink-soft">{t("analyzeEntry.dropHint")}</p>
         <div className="flex flex-wrap justify-center gap-2">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="ink-btn px-3 py-1.5 text-sm"
           >
-            Choose files / archive
+            {t("analyzeEntry.chooseFiles")}
           </button>
           <button
             type="button"
             onClick={() => dirInputRef.current?.click()}
             className="ink-btn px-3 py-1.5 text-sm"
           >
-            Choose folder
+            {t("analyzeEntry.chooseFolder")}
           </button>
         </div>
         <input
@@ -155,7 +157,7 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           type="file"
           multiple
           className="hidden"
-          aria-label="Upload files or archive"
+          aria-label={t("analyzeEntry.uploadFilesAria")}
           onChange={(e) => void handleFiles(e.target.files)}
         />
         <input
@@ -163,7 +165,7 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           type="file"
           multiple
           className="hidden"
-          aria-label="Upload folder"
+          aria-label={t("analyzeEntry.uploadFolderAria")}
           // webkitdirectory is a non-standard attribute not in the React types.
           // @ts-expect-error non-standard attribute
           webkitdirectory=""
