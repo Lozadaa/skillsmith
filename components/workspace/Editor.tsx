@@ -96,7 +96,7 @@ export function Editor({
           onScroll={handleScroll}
           spellCheck={false}
           aria-label={`Editor for ${file.path}`}
-          className={`${EDITOR_METRICS} absolute inset-0 resize-none bg-transparent text-transparent caret-ink outline-none selection:bg-ink/20`}
+          className={`${EDITOR_METRICS} absolute inset-0 resize-none bg-transparent text-transparent caret-ink outline-none selection:bg-ink/20 selection:text-transparent`}
         />
       </div>
     </div>

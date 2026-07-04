@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "serve out",
+    "start": "node server.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

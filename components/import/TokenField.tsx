@@ -18,8 +18,11 @@ export default function TokenField({
       </button>
       {open && (
         <div className="mt-2 flex flex-col gap-1">
-          <label htmlFor="gh-token" className="text-ink-soft">
-            Personal access token — raises the rate limit and unlocks private repos.
+          <a href="/api/oauth/login" className="ink-btn self-start px-3 py-1.5 text-sm font-medium">
+            Sign in with GitHub
+          </a>
+          <label htmlFor="gh-token" className="mt-2 text-ink-soft">
+            Or paste a personal access token — raises the rate limit and unlocks private repos.
           </label>
           <input
             id="gh-token"
