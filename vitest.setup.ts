@@ -1,3 +1,6 @@
+import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
+
 // Node 22+ ships a built-in `localStorage` global (guarded by the
 // `--experimental-webstorage` flag) that shadows jsdom's own Storage
 // implementation on `globalThis`. That built-in is a stub outside a real
@@ -45,4 +48,13 @@ function patchStorage(name: "localStorage" | "sessionStorage"): void {
 if (typeof window !== "undefined") {
   patchStorage("localStorage");
   patchStorage("sessionStorage");
+}
+
+// Auto-unmount React Testing Library trees between tests. RTL's own
+// auto-cleanup relies on a *global* `afterEach` (only present when
+// `test.globals: true`); this project imports test APIs explicitly, so
+// without this hook, component test files with more than one `render()`
+// in a describe block leak DOM across tests.
+if (typeof window !== "undefined") {
+  afterEach(cleanup);
 }
