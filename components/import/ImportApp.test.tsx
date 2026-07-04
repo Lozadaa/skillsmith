@@ -8,6 +8,12 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 const stash = vi.fn();
 vi.mock("@/lib/handoff", () => ({ stashIncomingSkill: (...a: unknown[]) => stash(...a) }));
+const downloadBlob = vi.fn();
+const zipCollection = vi.fn(() => new Uint8Array([1, 2, 3]));
+vi.mock("@/lib/zip", () => ({
+  downloadBlob: (...a: unknown[]) => downloadBlob(...a),
+  zipCollection: (...a: unknown[]) => zipCollection(...a),
+}));
 
 const SKILL_MD = `---\nname: alpha\ndescription: Use when demonstrating the alpha skill in a smoke test\n---\n# alpha\nBody.`;
 
@@ -137,5 +143,34 @@ describe("ImportApp", () => {
     const cta = await screen.findByRole("button", { name: /add a token/i });
     fireEvent.click(cta);
     expect(await screen.findByLabelText(/personal access token/i)).toBeTruthy();
+  });
+
+  function twoSkillClient(): GitHubClient {
+    return {
+      getRepoTree: async () => ({
+        entries: [
+          { path: "skills/alpha/SKILL.md", mode: "100644", type: "blob", sha: "a" },
+          { path: "skills/beta/SKILL.md", mode: "100644", type: "blob", sha: "b" },
+        ],
+        truncated: false,
+      }),
+      getBlobText: async () => SKILL_MD,
+      getReadme: async () => "",
+      getGistFiles: async () => [],
+    };
+  }
+
+  it("shows Download all only with ≥2 skills and bundles them into one zip", async () => {
+    downloadBlob.mockClear();
+    render(<ImportApp createClientFn={() => twoSkillClient()} />);
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    const dl = await screen.findByRole("button", { name: /download all/i });
+    fireEvent.click(dl);
+
+    await vi.waitFor(() => expect(downloadBlob).toHaveBeenCalledTimes(1));
+    expect(downloadBlob.mock.calls[0][0]).toBe("r-skills.zip");
+    expect(downloadBlob.mock.calls[0][2]).toBe("application/zip");
   });
 });

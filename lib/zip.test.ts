@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { zipSkill, unzipSkill } from "./zip";
+import { zipSkill, unzipSkill, zipCollection } from "./zip";
 import type { SkillFile } from "./skill-lint/model";
 
 const FILES: SkillFile[] = [
@@ -42,5 +42,22 @@ describe("unzipSkill root handling", () => {
     const bytes = zipSkill(mixed, ""); // rootDir "" → entries keep a/... and b/...
     const back = unzipSkill(bytes);
     expect(back.map((f) => f.path).sort()).toEqual(["a/SKILL.md", "b/other.md"]);
+  });
+});
+
+describe("zipCollection", () => {
+  it("nests each group under skills/<name>/ and round-trips via unzipSkill-free reading", () => {
+    const bytes = zipCollection([
+      { name: "alpha", files: [{ path: "SKILL.md", content: "a" }, { path: "references/x.md", content: "ax" }] },
+      { name: "beta", files: [{ path: "SKILL.md", content: "b" }] },
+    ]);
+    expect(bytes).toBeInstanceOf(Uint8Array);
+    // Re-read with fflate to assert the entry layout.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { unzipSync, strFromU8 } = require("fflate") as typeof import("fflate");
+    const raw = unzipSync(bytes);
+    const keys = Object.keys(raw).sort();
+    expect(keys).toEqual(["skills/alpha/SKILL.md", "skills/alpha/references/x.md", "skills/beta/SKILL.md"]);
+    expect(strFromU8(raw["skills/alpha/references/x.md"])).toBe("ax");
   });
 });

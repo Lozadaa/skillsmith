@@ -6,6 +6,8 @@ import { createClient, type GitHubClient } from "@/lib/github/client";
 import { parseGitHubUrl } from "@/lib/github/url";
 import { resolveTarget, type ImportResult, type PickerSkill } from "@/lib/github/importFlow";
 import { fetchSkillFiles } from "@/lib/github/fetchSkill";
+import { fetchAllSkills } from "@/lib/github/bulkFetch";
+import { downloadBlob, zipCollection } from "@/lib/zip";
 import type { RepoLink } from "@/lib/github/links";
 import TokenField from "./TokenField";
 import CollectionAudit from "./CollectionAudit";
@@ -33,6 +35,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
   const [view, setView] = useState<View>({ s: "idle" });
   const [busyDir, setBusyDir] = useState<string | null>(null);
   const [tokenOpen, setTokenOpen] = useState(false);
+  const [bulk, setBulk] = useState<{ running: boolean; step: string }>({ running: false, step: "" });
 
   // Token lives only in localStorage, read/written in the UI layer.
   useEffect(() => {
@@ -80,6 +83,29 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
     } catch (error) {
       setView({ s: "error", error });
     } finally {
+      setBusyDir(null);
+    }
+  }
+
+  async function downloadAll(result: Extract<ImportResult, { mode: "picker" }>) {
+    setBusyDir("__bulk__");
+    setBulk({ running: true, step: "Preparing…" });
+    try {
+      const refs = result.skills.map((s) => s.ref);
+      const { zips } = await fetchAllSkills(
+        makeClient(),
+        result.owner,
+        result.repo,
+        result.ref,
+        refs,
+        result.entries,
+        (step) => setBulk({ running: true, step })
+      );
+      downloadBlob(`${result.repo}-skills.zip`, zipCollection(zips), "application/zip");
+    } catch (error) {
+      setView({ s: "error", error });
+    } finally {
+      setBulk({ running: false, step: "" });
       setBusyDir(null);
     }
   }
@@ -178,6 +204,19 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
               Found {view.result.skills.length} skill{view.result.skills.length === 1 ? "" : "s"}.
             </p>
             {view.result.skills.length > 3 && <CollectionAudit skills={view.result.skills} />}
+            {view.result.skills.length >= 2 && (
+              <div className="mb-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={bulk.running}
+                  onClick={() => view.result.mode === "picker" && downloadAll(view.result)}
+                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+                >
+                  {bulk.running ? "Downloading…" : "Download all (.zip)"}
+                </button>
+                {bulk.running && <span className="text-sm text-gray-600">{bulk.step}</span>}
+              </div>
+            )}
             <SkillPicker
               skills={view.result.skills}
               busyDir={busyDir}

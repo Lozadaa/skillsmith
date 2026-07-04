@@ -28,6 +28,17 @@ export function unzipSkill(data: Uint8Array): SkillFile[] {
   return files;
 }
 
+/** Bundle multiple skills into one archive: each group nests under `skills/<name>/`. */
+export function zipCollection(groups: { name: string; files: SkillFile[] }[]): Uint8Array {
+  const entries: Record<string, Uint8Array> = {};
+  for (const g of groups) {
+    for (const f of g.files) {
+      entries[`skills/${g.name}/${f.path}`] = strToU8(f.content);
+    }
+  }
+  return zipSync(entries, { level: 6 });
+}
+
 /** The single top-level directory shared by every path, else "". */
 function commonRoot(paths: string[]): string {
   if (paths.length === 0) return "";
