@@ -147,3 +147,136 @@ describe("error mapping", () => {
       });
   });
 });
+
+describe("write methods: auth guard", () => {
+  it("throws a friendly GitHubError before any network call when no token is set", async () => {
+    let called = 0;
+    const fetchFn = (async () => {
+      called++;
+      return new Response("{}", { status: 200 });
+    }) as unknown as typeof fetch;
+    const client = createClient({ fetchFn });
+    await expect(client.createBlob("o", "r", "hi")).rejects.toBeInstanceOf(GitHubError);
+    await client.createBlob("o", "r", "hi").catch((e: GitHubError) => {
+      expect(e.message).toMatch(/token with repo scope is required/i);
+    });
+    expect(called).toBe(0);
+  });
+
+  it("guards createRepo, createTree, createCommit and updateRef the same way", async () => {
+    const client = createClient({}); // no fetchFn, no token — must never reach fetch
+    await expect(client.createRepo({ name: "x", isPrivate: false })).rejects.toBeInstanceOf(GitHubError);
+    await expect(client.createTree("o", "r", "base", [])).rejects.toBeInstanceOf(GitHubError);
+    await expect(client.createCommit("o", "r", { message: "m", treeSha: "t", parentSha: "p" })).rejects.toBeInstanceOf(GitHubError);
+    await expect(client.updateRef("o", "r", "main", "c")).rejects.toBeInstanceOf(GitHubError);
+  });
+});
+
+describe("write methods: happy paths", () => {
+  it("getUser returns the login", async () => {
+    const fetchFn = mockFetch({ "/user": { body: { login: "octocat", id: 1 } } });
+    expect(await createClient({ token: "t", fetchFn }).getUser()).toEqual({ login: "octocat" });
+  });
+
+  it("getDefaultBranch reads default_branch from the repo metadata", async () => {
+    const fetchFn = mockFetch({ "/repos/o/r": { body: { default_branch: "trunk" } } });
+    expect(await createClient({ fetchFn }).getDefaultBranch("o", "r")).toEqual({ defaultBranch: "trunk" });
+  });
+
+  it("createRepo posts auto_init and maps the response fields", async () => {
+    let seen: { method?: string; body?: unknown } = {};
+    const fetchFn = (async (_url: string, init?: RequestInit) => {
+      seen = { method: init?.method, body: init?.body ? JSON.parse(String(init.body)) : undefined };
+      return new Response(
+        JSON.stringify({ name: "my-skill", owner: { login: "octocat" }, default_branch: "main", html_url: "https://github.com/octocat/my-skill" }),
+        { status: 201, headers: { "content-type": "application/json" } }
+      );
+    }) as unknown as typeof fetch;
+    const out = await createClient({ token: "t", fetchFn }).createRepo({ name: "my-skill", isPrivate: true, description: "d" });
+    expect(seen.method).toBe("POST");
+    expect(seen.body).toMatchObject({ name: "my-skill", private: true, description: "d", auto_init: true });
+    expect(out).toEqual({ owner: "octocat", repo: "my-skill", defaultBranch: "main", htmlUrl: "https://github.com/octocat/my-skill" });
+  });
+
+  it("getRef and getCommit unwrap the git-data shapes", async () => {
+    const fetchFn = mockFetch({
+      "/repos/o/r/git/ref/heads/main": { body: { object: { sha: "headsha" } } },
+      "/repos/o/r/git/commits/headsha": { body: { tree: { sha: "treesha" } } },
+    });
+    const client = createClient({ token: "t", fetchFn });
+    expect(await client.getRef("o", "r", "main")).toEqual({ sha: "headsha" });
+    expect(await client.getCommit("o", "r", "headsha")).toEqual({ treeSha: "treesha" });
+  });
+
+  it("createBlob posts utf-8 content and returns the sha", async () => {
+    let body: unknown;
+    const fetchFn = (async (_url: string, init?: RequestInit) => {
+      body = init?.body ? JSON.parse(String(init.body)) : undefined;
+      return new Response(JSON.stringify({ sha: "blobsha" }), { status: 201, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    const out = await createClient({ token: "t", fetchFn }).createBlob("o", "r", "hello");
+    expect(body).toEqual({ content: "hello", encoding: "utf-8" });
+    expect(out).toEqual({ sha: "blobsha" });
+  });
+
+  it("createTree sends base_tree and 100644 blob entries", async () => {
+    let body: { base_tree?: string; tree?: unknown[] } = {};
+    const fetchFn = (async (_url: string, init?: RequestInit) => {
+      body = init?.body ? JSON.parse(String(init.body)) : {};
+      return new Response(JSON.stringify({ sha: "treesha" }), { status: 201, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    const out = await createClient({ token: "t", fetchFn }).createTree("o", "r", "basesha", [{ path: "SKILL.md", sha: "b1" }]);
+    expect(body.base_tree).toBe("basesha");
+    expect(body.tree).toEqual([{ path: "SKILL.md", mode: "100644", type: "blob", sha: "b1" }]);
+    expect(out).toEqual({ sha: "treesha" });
+  });
+
+  it("createCommit sends message/tree/parents and returns the sha", async () => {
+    let body: unknown;
+    const fetchFn = (async (_url: string, init?: RequestInit) => {
+      body = init?.body ? JSON.parse(String(init.body)) : undefined;
+      return new Response(JSON.stringify({ sha: "commitsha" }), { status: 201, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    const out = await createClient({ token: "t", fetchFn }).createCommit("o", "r", { message: "Add skill", treeSha: "t", parentSha: "p" });
+    expect(body).toEqual({ message: "Add skill", tree: "t", parents: ["p"] });
+    expect(out).toEqual({ sha: "commitsha" });
+  });
+
+  it("updateRef PATCHes refs/heads with force:false", async () => {
+    let seen: { url?: string; method?: string; body?: unknown } = {};
+    const fetchFn = (async (url: string, init?: RequestInit) => {
+      seen = { url: String(url), method: init?.method, body: init?.body ? JSON.parse(String(init.body)) : undefined };
+      return new Response(JSON.stringify({ ref: "refs/heads/main", object: { sha: "commitsha" } }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    await createClient({ token: "t", fetchFn }).updateRef("o", "r", "main", "commitsha");
+    expect(seen.url).toContain("/repos/o/r/git/refs/heads/main");
+    expect(seen.method).toBe("PATCH");
+    expect(seen.body).toEqual({ sha: "commitsha", force: false });
+  });
+});
+
+describe("write methods: error mapping", () => {
+  it("maps a 401 to a GitHubError carrying the API message", async () => {
+    const fetchFn = mockFetch({ "/user": { status: 401, body: { message: "Bad credentials" } } });
+    await createClient({ token: "bad", fetchFn })
+      .getUser()
+      .catch((e: unknown) => {
+        expect(e).toBeInstanceOf(GitHubError);
+        expect((e as GitHubError).status).toBe(401);
+        expect((e as GitHubError).message).toBe("Bad credentials");
+      });
+  });
+
+  it("passes a 422 name-already-exists message straight through", async () => {
+    const fetchFn = mockFetch({
+      "/user/repos": { status: 422, body: { message: "name already exists on this account" } },
+    });
+    await createClient({ token: "t", fetchFn })
+      .createRepo({ name: "dup", isPrivate: false })
+      .catch((e: unknown) => {
+        expect(e).toBeInstanceOf(GitHubError);
+        expect((e as GitHubError).status).toBe(422);
+        expect((e as GitHubError).message).toMatch(/already exists/i);
+      });
+  });
+});

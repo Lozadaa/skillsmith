@@ -48,6 +48,29 @@ export interface GitHubClient {
   getBlobText(owner: string, repo: string, sha: string): Promise<string>;
   getReadme(owner: string, repo: string): Promise<string>;
   getGistFiles(gistId: string): Promise<GistFile[]>;
+  getUser(): Promise<{ login: string }>;
+  getDefaultBranch(owner: string, repo: string): Promise<{ defaultBranch: string }>;
+  createRepo(opts: { name: string; isPrivate: boolean; description?: string }): Promise<{
+    owner: string;
+    repo: string;
+    defaultBranch: string;
+    htmlUrl: string;
+  }>;
+  getRef(owner: string, repo: string, branch: string): Promise<{ sha: string }>;
+  getCommit(owner: string, repo: string, sha: string): Promise<{ treeSha: string }>;
+  createBlob(owner: string, repo: string, contentUtf8: string): Promise<{ sha: string }>;
+  createTree(
+    owner: string,
+    repo: string,
+    baseTreeSha: string,
+    entries: { path: string; sha: string }[]
+  ): Promise<{ sha: string }>;
+  createCommit(
+    owner: string,
+    repo: string,
+    opts: { message: string; treeSha: string; parentSha: string }
+  ): Promise<{ sha: string }>;
+  updateRef(owner: string, repo: string, branch: string, commitSha: string): Promise<void>;
 }
 
 interface RawTreeEntry {
@@ -89,12 +112,29 @@ export function createClient(opts: { token?: string; fetchFn?: typeof fetch } = 
   const token = opts.token?.trim();
   const doFetch = opts.fetchFn ?? fetch;
 
-  async function getJson<T>(path: string): Promise<T> {
+  function requireToken(): void {
+    if (!token) {
+      throw new GitHubError(401, "a token with repo scope is required to publish — add one in the token field");
+    }
+  }
+
+  async function api<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
     const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
-    const res = await doFetch(`${API}${path}`, { headers });
+    if (init?.body !== undefined) headers["Content-Type"] = "application/json";
+    const res = await doFetch(`${API}${path}`, {
+      method: init?.method ?? "GET",
+      headers,
+      body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+    });
     if (!res.ok) throw await mapError(res);
+    if (res.status === 204) return undefined as T;
     return (await res.json()) as T;
+  }
+
+  // Read helper retained for the existing methods (GET, JSON in).
+  function getJson<T>(path: string): Promise<T> {
+    return api<T>(path);
   }
 
   async function getRepoTree(owner: string, repo: string, ref?: string): Promise<RepoTree> {
@@ -133,5 +173,107 @@ export function createClient(opts: { token?: string; fetchFn?: typeof fetch } = 
     }));
   }
 
-  return { getRepoTree, getBlobText, getReadme, getGistFiles };
+  async function getUser(): Promise<{ login: string }> {
+    requireToken();
+    const data = await api<{ login: string }>(`/user`);
+    return { login: data.login };
+  }
+
+  async function getDefaultBranch(owner: string, repo: string): Promise<{ defaultBranch: string }> {
+    const data = await api<{ default_branch: string }>(`/repos/${owner}/${repo}`);
+    return { defaultBranch: data.default_branch };
+  }
+
+  async function createRepo(opts: {
+    name: string;
+    isPrivate: boolean;
+    description?: string;
+  }): Promise<{ owner: string; repo: string; defaultBranch: string; htmlUrl: string }> {
+    requireToken();
+    const data = await api<{
+      name: string;
+      owner: { login: string };
+      default_branch: string;
+      html_url: string;
+    }>(`/user/repos`, {
+      method: "POST",
+      body: { name: opts.name, private: opts.isPrivate, description: opts.description, auto_init: true },
+    });
+    return { owner: data.owner.login, repo: data.name, defaultBranch: data.default_branch, htmlUrl: data.html_url };
+  }
+
+  async function getRef(owner: string, repo: string, branch: string): Promise<{ sha: string }> {
+    const data = await api<{ object: { sha: string } }>(
+      `/repos/${owner}/${repo}/git/ref/heads/${encodeURIComponent(branch)}`
+    );
+    return { sha: data.object.sha };
+  }
+
+  async function getCommit(owner: string, repo: string, sha: string): Promise<{ treeSha: string }> {
+    const data = await api<{ tree: { sha: string } }>(`/repos/${owner}/${repo}/git/commits/${sha}`);
+    return { treeSha: data.tree.sha };
+  }
+
+  async function createBlob(owner: string, repo: string, contentUtf8: string): Promise<{ sha: string }> {
+    requireToken();
+    const data = await api<{ sha: string }>(`/repos/${owner}/${repo}/git/blobs`, {
+      method: "POST",
+      body: { content: contentUtf8, encoding: "utf-8" },
+    });
+    return { sha: data.sha };
+  }
+
+  async function createTree(
+    owner: string,
+    repo: string,
+    baseTreeSha: string,
+    entries: { path: string; sha: string }[]
+  ): Promise<{ sha: string }> {
+    requireToken();
+    const data = await api<{ sha: string }>(`/repos/${owner}/${repo}/git/trees`, {
+      method: "POST",
+      body: {
+        base_tree: baseTreeSha,
+        tree: entries.map((e) => ({ path: e.path, mode: "100644", type: "blob", sha: e.sha })),
+      },
+    });
+    return { sha: data.sha };
+  }
+
+  async function createCommit(
+    owner: string,
+    repo: string,
+    opts: { message: string; treeSha: string; parentSha: string }
+  ): Promise<{ sha: string }> {
+    requireToken();
+    const data = await api<{ sha: string }>(`/repos/${owner}/${repo}/git/commits`, {
+      method: "POST",
+      body: { message: opts.message, tree: opts.treeSha, parents: [opts.parentSha] },
+    });
+    return { sha: data.sha };
+  }
+
+  async function updateRef(owner: string, repo: string, branch: string, commitSha: string): Promise<void> {
+    requireToken();
+    await api(`/repos/${owner}/${repo}/git/refs/heads/${encodeURIComponent(branch)}`, {
+      method: "PATCH",
+      body: { sha: commitSha, force: false },
+    });
+  }
+
+  return {
+    getRepoTree,
+    getBlobText,
+    getReadme,
+    getGistFiles,
+    getUser,
+    getDefaultBranch,
+    createRepo,
+    getRef,
+    getCommit,
+    createBlob,
+    createTree,
+    createCommit,
+    updateRef,
+  };
 }
