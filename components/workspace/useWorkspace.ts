@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   lintSkill,
   type Finding,
@@ -102,9 +102,12 @@ export function useWorkspace(profile: Profile) {
   // Server + first client render use the deterministic demo (no hydration mismatch).
   const [state, dispatch] = useReducer(workspaceReducer, undefined, initialState);
   const [hydrated, setHydrated] = useState(false);
+  const restoredRef = useRef(false);
 
   // After mount: pull an incoming skill or a saved draft (spec §3).
   useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
     const restored = restore();
     if (restored) dispatch({ type: "loadFiles", files: restored.files, dirName: restored.dirName });
     setHydrated(true);

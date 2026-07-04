@@ -11,6 +11,7 @@ export default defineConfig({
     // Node by default (engine + pure libs). Component tests opt into jsdom
     // per-file with a `// @vitest-environment jsdom` pragma on line 1.
     environment: "node",
+    setupFiles: ["./vitest.setup.ts"],
     include: [
       "lib/**/*.test.ts",
       "components/**/*.test.ts",
