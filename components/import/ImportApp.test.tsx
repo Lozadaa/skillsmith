@@ -261,6 +261,9 @@ describe("ImportApp — signed-in panel", () => {
 
     expect(await screen.findByText(/signed in as/i)).toBeTruthy();
     expect(screen.getByText("octocat")).toBeTruthy();
+    // Search-first: rows render only for matching queries.
+    expect(screen.queryByText("octocat/skills")).toBeNull();
+    fireEvent.change(screen.getByLabelText(/search your repos/i), { target: { value: "skil" } });
     expect(screen.getByText("octocat/skills")).toBeTruthy();
   });
 
@@ -296,6 +299,8 @@ describe("ImportApp — signed-in panel", () => {
     const client = signedInClient({ listUserRepos: async () => repos });
     render(<ImportApp createClientFn={() => client} />);
 
+    await screen.findByText(/signed in as/i);
+    fireEvent.change(screen.getByLabelText(/search your repos/i), { target: { value: "skills" } });
     const scanBtn = await screen.findByRole("button", { name: /^scan$/i });
     fireEvent.click(scanBtn);
     expect(await screen.findByText("alpha")).toBeTruthy();
