@@ -1,5 +1,5 @@
 import type { SkillFile } from "@/lib/skill-lint";
-import type { GitHubClient, TreeEntry } from "./client";
+import { RateLimitError, type GitHubClient, type TreeEntry } from "./client";
 import { detectSkills, type DetectedSkillRef } from "./detect";
 import { extractRepoLinks, type RepoLink } from "./links";
 import { findSkillMd } from "./fetchSkill";
@@ -76,7 +76,8 @@ async function resolveRepo(
       try {
         const content = await client.getBlobText(owner, repo, entry.sha);
         lint = miniLint(content, skillRef.name);
-      } catch {
+      } catch (e) {
+        if (e instanceof RateLimitError) throw e;
         lint = { ok: false, score: 0, errors: 0, warnings: 0, reason: "failed to fetch SKILL.md" };
       }
     }

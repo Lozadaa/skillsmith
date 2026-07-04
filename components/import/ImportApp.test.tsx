@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ImportApp from "./ImportApp";
-import type { GitHubClient } from "@/lib/github/client";
+import { RateLimitError, type GitHubClient } from "@/lib/github/client";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -57,5 +57,26 @@ describe("ImportApp", () => {
     await vi.waitFor(() => expect(stash).toHaveBeenCalledTimes(1));
     expect(stash.mock.calls[0][1]).toMatchObject({ dirName: "alpha", source: expect.stringContaining("github") });
     expect(push).toHaveBeenCalledWith("/workspace");
+  });
+
+  it("opens the token field when the rate-limit CTA is clicked", async () => {
+    const rateLimitedClient: GitHubClient = {
+      getRepoTree: async () => {
+        throw new RateLimitError(1700000000);
+      },
+      getBlobText: async () => SKILL_MD,
+      getReadme: async () => "",
+      getGistFiles: async () => [],
+    };
+    render(<ImportApp createClientFn={() => rateLimitedClient} />);
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    const cta = await screen.findByRole("button", { name: /add a token/i });
+    expect(screen.queryByLabelText(/personal access token/i)).toBeNull();
+
+    fireEvent.click(cta);
+
+    expect(await screen.findByLabelText(/personal access token/i)).toBeTruthy();
   });
 });

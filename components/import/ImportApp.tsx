@@ -31,6 +31,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
   const [token, setToken] = useState("");
   const [view, setView] = useState<View>({ s: "idle" });
   const [busyDir, setBusyDir] = useState<string | null>(null);
+  const [tokenOpen, setTokenOpen] = useState(false);
 
   // Token lives only in localStorage, read/written in the UI layer.
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
             Import
           </button>
         </div>
-        <TokenField token={token} onChange={updateToken} />
+        <TokenField token={token} onChange={updateToken} open={tokenOpen} onToggle={setTokenOpen} />
       </form>
 
       <section className="mt-6">
@@ -131,7 +132,13 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         )}
 
         {view.s === "error" && (
-          <ErrorPanel error={view.error} onNeedToken={() => document.getElementById("gh-token")?.focus()} />
+          <ErrorPanel
+            error={view.error}
+            onNeedToken={() => {
+              setTokenOpen(true);
+              requestAnimationFrame(() => document.getElementById("gh-token")?.focus());
+            }}
+          />
         )}
 
         {view.s === "result" && view.result.mode === "links" && (

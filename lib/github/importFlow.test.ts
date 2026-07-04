@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { resolveTarget } from "./importFlow";
-import type { GitHubClient } from "./client";
+import { RateLimitError, type GitHubClient } from "./client";
 
 const SKILL_MD = (name: string) => `---\nname: ${name}\ndescription: Use when demonstrating the ${name} skill in tests\n---\n# ${name}\nBody.`;
 
@@ -33,6 +33,23 @@ describe("resolveTarget (repo → picker)", () => {
     expect(result.skills.every((s) => s.lint.ok && s.scanned)).toBe(true);
     expect(result.skills[0].lint.score).toBeGreaterThan(0);
     expect(steps.some((s) => /Analyzing/i.test(s))).toBe(true);
+  });
+
+  it("aborts the scan and rethrows when mid-scan mini-lint hits a rate limit", async () => {
+    const c = client({
+      getRepoTree: async () => ({
+        entries: [
+          { path: "skills/alpha/SKILL.md", mode: "100644", type: "blob", sha: "a" },
+          { path: "skills/beta/SKILL.md", mode: "100644", type: "blob", sha: "b" },
+        ],
+        truncated: false,
+      }),
+      getBlobText: async (_o, _r, sha) => {
+        if (sha === "b") throw new RateLimitError(1700000000);
+        return SKILL_MD("alpha");
+      },
+    });
+    await expect(resolveTarget(c, { kind: "repo", owner: "o", repo: "r" })).rejects.toBeInstanceOf(RateLimitError);
   });
 
   it("passes the truncated flag through", async () => {

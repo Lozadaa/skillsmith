@@ -1,11 +1,19 @@
 "use client";
-import { useState } from "react";
 
-export default function TokenField({ token, onChange }: { token: string; onChange: (t: string) => void }) {
-  const [open, setOpen] = useState(false);
+export default function TokenField({
+  token,
+  onChange,
+  open,
+  onToggle,
+}: {
+  token: string;
+  onChange: (t: string) => void;
+  open: boolean;
+  onToggle: (open: boolean) => void;
+}) {
   return (
     <div className="mt-2 text-sm">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="text-blue-600 underline">
+      <button type="button" onClick={() => onToggle(!open)} className="text-blue-600 underline">
         {open ? "Hide" : "GitHub token (optional)"}
       </button>
       {open && (
