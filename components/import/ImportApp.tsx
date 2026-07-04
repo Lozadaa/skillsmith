@@ -129,8 +129,8 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">Import a skill from GitHub</h1>
-      <p className="mt-1 text-sm text-gray-600">Paste a repo, gist, or owner/repo. Everything runs in your browser.</p>
+      <h1 className="font-display text-3xl text-ink">Import a skill from GitHub</h1>
+      <p className="mt-1 text-sm text-ink-soft">Paste a repo, gist, or owner/repo. Everything runs in your browser.</p>
 
       <form
         className="mt-4"
@@ -139,7 +139,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
           void run(url);
         }}
       >
-        <label htmlFor="repo-url" className="block text-sm font-medium">
+        <label htmlFor="repo-url" className="block text-sm font-medium text-ink">
           Repository URL
         </label>
         <div className="mt-1 flex gap-2">
@@ -148,9 +148,9 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://github.com/owner/repo"
-            className="flex-1 rounded border px-3 py-2"
+            className="flex-1 rounded border-2 border-ink bg-paper px-3 py-2 text-ink outline-none focus:border-ember"
           />
-          <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white">
+          <button type="submit" className="ink-btn px-4 py-2 font-medium">
             Import
           </button>
         </div>
@@ -159,8 +159,8 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
 
       <section className="mt-6">
         {view.s === "loading" && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" aria-hidden />
+          <div className="flex items-center gap-2 text-sm text-ink-soft">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink/20 border-t-ember" aria-hidden />
             <span>{view.step}</span>
           </div>
         )}
@@ -180,19 +180,19 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         )}
 
         {view.s === "result" && view.result.mode === "empty" && (
-          <p className="text-sm text-gray-600">{view.result.reason}</p>
+          <p className="text-sm text-ink-soft">{view.result.reason}</p>
         )}
 
         {view.s === "result" && view.result.mode === "gist" && (
-          <div className="rounded border p-4">
-            <p className="text-sm">
+          <div className="ink-panel p-4">
+            <p className="text-sm text-ink">
               Gist skill <span className="font-medium">{view.result.dirName}</span> — score{" "}
               {view.result.lint.ok ? view.result.lint.score : "n/a"}.
             </p>
             <button
               type="button"
               onClick={() => openGist(view.result as Extract<ImportResult, { mode: "gist" }>)}
-              className="mt-2 rounded bg-blue-600 px-3 py-1 text-white"
+              className="ink-btn mt-2 px-3 py-1 text-sm"
             >
               Open
             </button>
@@ -202,12 +202,12 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         {view.s === "result" && view.result.mode === "picker" && (
           <div>
             {view.result.truncated && (
-              <div className="mb-3 rounded border border-amber-400 bg-amber-50 p-3 text-sm">
+              <div className="ink-panel mb-3 p-3 text-sm text-severity-warning">
                 This repository is very large; GitHub truncated the file tree, so these results are partial. Import a
                 subfolder URL (…/tree/main/path) for complete results.
               </div>
             )}
-            <p className="mb-2 text-sm text-gray-600">
+            <p className="mb-2 text-sm text-ink-soft">
               Found {view.result.skills.length} skill{view.result.skills.length === 1 ? "" : "s"}.
             </p>
             {view.result.skills.length > 3 && <CollectionAudit skills={view.result.skills} />}
@@ -217,11 +217,11 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
                   type="button"
                   disabled={bulk.running || busyDir !== null}
                   onClick={() => view.result.mode === "picker" && downloadAll(view.result)}
-                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+                  className="ink-btn px-3 py-1 text-sm"
                 >
                   {bulk.running ? "Downloading…" : "Download all (.zip)"}
                 </button>
-                {bulk.step && <span className="text-sm text-gray-600">{bulk.step}</span>}
+                {bulk.step && <span className="text-sm text-ink-soft">{bulk.step}</span>}
               </div>
             )}
             <SkillPicker

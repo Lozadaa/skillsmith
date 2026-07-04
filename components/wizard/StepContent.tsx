@@ -24,7 +24,7 @@ const CATEGORIES = [
 const LICENSES = ["none", "MIT", "Apache-2.0", "Proprietary"];
 
 const fieldClass =
-  "mt-1 w-full rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-400";
+  "mt-1 w-full rounded border-2 border-ink bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-ember";
 
 export function StepContent({ state, dispatch }: { state: WizardState; dispatch: Dispatch<WizardAction> }) {
   const archetype = getArchetype(state.archetypeId);
@@ -37,7 +37,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
     <div className="space-y-6">
       {archetype?.sections.map((s) => (
         <label key={s.id} className="block">
-          <span className="text-sm font-medium text-neutral-200">{s.title}</span>
+          <span className="text-sm font-medium text-ink">{s.title}</span>
           <textarea
             rows={5}
             className={`${fieldClass} font-mono`}
@@ -48,14 +48,14 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
         </label>
       ))}
 
-      <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 text-xs">
-        <div className="flex flex-wrap gap-4 text-neutral-400">
+      <div className="ink-panel p-4 text-xs">
+        <div className="flex flex-wrap gap-4 text-ink-soft">
           <span data-testid="body-lines">{lines} lines</span>
           <span>{words} words</span>
           <span>~{tokens} tokens</span>
         </div>
         {lines > 400 && (
-          <p data-testid="body-warn" className="mt-2 text-amber-400">
+          <p data-testid="body-warn" className="mt-2 text-severity-warning">
             The body is over 400 lines — move detail into references/ so it loads only when needed.
           </p>
         )}
@@ -63,7 +63,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium text-neutral-200">Category</span>
+          <span className="text-sm font-medium text-ink">Category</span>
           <select
             className={fieldClass}
             value={state.category}
@@ -79,7 +79,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-neutral-200">License</span>
+          <span className="text-sm font-medium text-ink">License</span>
           <select
             className={fieldClass}
             value={state.license}
@@ -94,7 +94,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-neutral-200">Version</span>
+          <span className="text-sm font-medium text-ink">Version</span>
           <input
             className={fieldClass}
             value={state.version}
@@ -108,7 +108,7 @@ export function StepContent({ state, dispatch }: { state: WizardState; dispatch:
             checked={state.disableModelInvocation}
             onChange={(e) => dispatch({ type: "toggle", field: "disableModelInvocation", value: e.target.checked })}
           />
-          <span className="text-sm text-neutral-200">User-invoked only (disable-model-invocation)</span>
+          <span className="text-sm text-ink">User-invoked only (disable-model-invocation)</span>
         </label>
       </div>
     </div>

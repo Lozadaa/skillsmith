@@ -22,7 +22,7 @@ export default function SkillPicker({
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b text-gray-500">
+          <tr className="border-b-2 border-ink text-ink-soft">
             <th className="py-2 pr-4">Skill</th>
             <th className="py-2 pr-4">Origin</th>
             <th className="py-2 pr-4">Path</th>
@@ -33,27 +33,27 @@ export default function SkillPicker({
         </thead>
         <tbody>
           {skills.map((s) => (
-            <tr key={s.ref.dirPath || s.ref.name} className="border-b">
-              <td className="py-2 pr-4 font-medium">
+            <tr key={s.ref.dirPath || s.ref.name} className="border-b border-ink/30">
+              <td className="py-2 pr-4 font-medium text-ink">
                 {s.ref.name}
-                {s.ref.viaSymlink && <span className="ml-1 text-xs text-gray-400">(symlink)</span>}
+                {s.ref.viaSymlink && <span className="ml-1 text-xs text-ink-soft">(symlink)</span>}
               </td>
               <td className="py-2 pr-4">
-                <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{ORIGIN_LABEL[s.ref.origin]}</span>
-                {s.ref.pluginName && <span className="ml-1 text-xs text-gray-500">{s.ref.pluginName}</span>}
+                <span className="rounded border border-ink px-2 py-0.5 text-xs text-ink">{ORIGIN_LABEL[s.ref.origin]}</span>
+                {s.ref.pluginName && <span className="ml-1 text-xs text-ink-soft">{s.ref.pluginName}</span>}
               </td>
-              <td className="py-2 pr-4 font-mono text-xs text-gray-500">{s.ref.dirPath || "(root)"}</td>
-              <td className="py-2 pr-4" data-testid={`mini-score-${s.ref.dirPath || s.ref.name}`}>
+              <td className="py-2 pr-4 font-mono text-xs text-ink-soft">{s.ref.dirPath || "(root)"}</td>
+              <td className="py-2 pr-4 font-display text-ink" data-testid={`mini-score-${s.ref.dirPath || s.ref.name}`}>
                 {s.scanned && s.lint.ok ? s.lint.score : "—"}
               </td>
               <td className="py-2 pr-4 text-xs">
                 {s.scanned && s.lint.ok ? (
                   <span>
-                    <span className="text-red-600">{s.lint.errors}E</span> /{" "}
-                    <span className="text-amber-600">{s.lint.warnings}W</span>
+                    <span className="text-severity-error">{s.lint.errors}E</span> /{" "}
+                    <span className="text-severity-warning">{s.lint.warnings}W</span>
                   </span>
                 ) : (
-                  <span className="text-gray-400">{s.lint.reason ?? "not scanned"}</span>
+                  <span className="text-ink-soft">{s.lint.reason ?? "not scanned"}</span>
                 )}
               </td>
               <td className="py-2 text-right">
@@ -61,7 +61,7 @@ export default function SkillPicker({
                   type="button"
                   disabled={busyDir !== null}
                   onClick={() => onOpen(s)}
-                  className="rounded bg-blue-600 px-3 py-1 text-white disabled:opacity-50"
+                  className="ink-btn px-3 py-1 text-sm"
                 >
                   {busyDir === s.ref.dirPath ? "Opening…" : "Open"}
                 </button>

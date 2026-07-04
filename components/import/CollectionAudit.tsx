@@ -33,7 +33,7 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mb-3 rounded border px-3 py-1 text-sm text-blue-600"
+        className="ink-btn mb-3 px-3 py-1 text-sm"
       >
         Audit whole collection ({scanned.length} scanned)
       </button>
@@ -42,23 +42,23 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
 
   const header = (key: SortKey, label: string) => (
     <th className="py-2 pr-4">
-      <button type="button" onClick={() => sortBy(key)} className="font-medium hover:underline">
+      <button type="button" onClick={() => sortBy(key)} className="ink-underline font-medium text-ink hover:text-ember">
         {label}
       </button>
     </th>
   );
 
   return (
-    <div className="mb-4 overflow-x-auto rounded border p-3">
+    <div className="ink-panel mb-4 overflow-x-auto p-3">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Collection audit — {scanned.length} skills</h2>
-        <button type="button" onClick={() => setOpen(false)} className="text-xs text-gray-500 underline">
+        <h2 className="font-display text-lg text-ink">Collection audit — {scanned.length} skills</h2>
+        <button type="button" onClick={() => setOpen(false)} className="ink-underline text-xs text-ink-soft hover:text-ember">
           Hide
         </button>
       </div>
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b text-gray-500">
+          <tr className="border-b-2 border-ink text-ink-soft">
             {header("name", "Skill")}
             {header("score", "Score")}
             {header("errors", "Errors")}
@@ -66,10 +66,10 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
         </thead>
         <tbody>
           {sorted.map((s) => (
-            <tr key={s.ref.dirPath || s.ref.name} className="border-b">
-              <td className="py-2 pr-4 font-medium">{s.ref.name}</td>
-              <td className="py-2 pr-4">{s.lint.score}</td>
-              <td className="py-2 pr-4">{s.lint.errors}</td>
+            <tr key={s.ref.dirPath || s.ref.name} className="border-b border-ink/30">
+              <td className="py-2 pr-4 font-medium text-ink">{s.ref.name}</td>
+              <td className="py-2 pr-4 font-display text-ink">{s.lint.score}</td>
+              <td className="py-2 pr-4 text-ink">{s.lint.errors}</td>
             </tr>
           ))}
         </tbody>

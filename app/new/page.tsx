@@ -13,9 +13,9 @@ export default function NewSkillPage() {
   const [state, dispatch] = useWizard();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8 text-neutral-100">
-      <h1 className="text-xl font-semibold">Create a skill</h1>
-      <p className="mt-1 text-sm text-neutral-400">
+    <main className="mx-auto max-w-3xl px-4 py-8 text-ink">
+      <h1 className="font-display text-3xl text-ink">Create a skill</h1>
+      <p className="mt-1 text-sm text-ink-soft">
         Answer a few questions and Skillsmith assembles a spec-compliant skill.
       </p>
 
@@ -31,12 +31,12 @@ export default function NewSkillPage() {
         {state.step === 5 && <StepReview state={state} />}
       </div>
 
-      <div className="mt-10 flex items-center justify-between border-t border-neutral-800 pt-6">
+      <div className="mt-10 flex items-center justify-between border-t-2 border-ink pt-6">
         <button
           type="button"
           onClick={() => dispatch({ type: "back" })}
           disabled={state.step === 1}
-          className="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:border-neutral-500 disabled:cursor-not-allowed disabled:opacity-40"
+          className="ink-btn px-4 py-2 text-sm"
         >
           Back
         </button>
@@ -45,7 +45,7 @@ export default function NewSkillPage() {
             type="button"
             onClick={() => dispatch({ type: "next" })}
             disabled={!canAdvance(state)}
-            className="rounded bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
+            className="ink-btn px-4 py-2 text-sm font-medium"
           >
             Next
           </button>
