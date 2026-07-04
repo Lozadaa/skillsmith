@@ -1,0 +1,7 @@
+# Force `npm install` instead of Nixpacks' default `npm ci`.
+# Tailwind 4's @tailwindcss/oxide ships per-platform native binaries; `npm ci`
+# hits npm's optional-dependency bug (npm/cli#4828) and fails to install the
+# Linux binding even though the lockfile lists it. A fresh `npm install`
+# resolves the correct native binary on Railway's Linux builder.
+[phases.install]
+cmds = ["npm install --no-audit --no-fund"]
