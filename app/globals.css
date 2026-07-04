@@ -160,12 +160,12 @@
      background-size 1200% + steps(12, jump-none) lands each frame exactly
      at i*(100/11)% — no partial frames, no JS. */
   .ink-forge {
-    aspect-ratio: 480 / 539;
+    aspect-ratio: 480 / 540;
     background-image: url("/blacksmith-frames.png");
     background-size: 1200% 100%;
     background-repeat: no-repeat;
     background-position-x: 0%;
-    animation: ink-forge-swing 1.8s steps(12, jump-none) infinite;
+    animation: ink-forge-swing 3s steps(12, jump-none) infinite;
   }
   @keyframes ink-forge-swing {
     from { background-position-x: 0%; }
