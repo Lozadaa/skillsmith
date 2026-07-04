@@ -41,4 +41,16 @@ describe("WorkspacePage paste flow", () => {
     // No frontmatter → not-a-skill → export must stay gated even though there are no "skill" findings.
     expect((screen.getByRole("button", { name: "Download .zip" }) as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it("gates Publish to GitHub behind the same error gate as export", () => {
+    render(<WorkspacePage />);
+    // Demo is valid → publish enabled.
+    expect((screen.getByRole("button", { name: "Publish to GitHub" }) as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Open…" }));
+    const paste = screen.getByLabelText("Paste a SKILL.md");
+    fireEvent.change(paste, { target: { value: "# just markdown" } });
+    fireEvent.click(screen.getByRole("button", { name: "Analyze" }));
+    // Not-a-skill → publish disabled.
+    expect((screen.getByRole("button", { name: "Publish to GitHub" }) as HTMLButtonElement).disabled).toBe(true);
+  });
 });

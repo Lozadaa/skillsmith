@@ -10,6 +10,7 @@ import { Editor } from "@/components/workspace/Editor";
 import { ScoreBadge } from "@/components/workspace/ScoreBadge";
 import { ProfileSelect } from "@/components/workspace/ProfileSelect";
 import { ExportButtons } from "@/components/workspace/ExportButtons";
+import { PublishDialog } from "@/components/workspace/PublishDialog";
 import { NotASkillPanel } from "@/components/workspace/NotASkillPanel";
 import { AnalyzeEntry } from "@/components/AnalyzeEntry";
 
@@ -39,6 +40,7 @@ export default function WorkspacePage() {
   const [profile, setProfile] = useState<Profile>("generic");
   const [tab, setTab] = useState<"findings" | "tokens">("findings");
   const [showOpen, setShowOpen] = useState(false);
+  const [showPublish, setShowPublish] = useState(false);
   const { state, dispatch, outcome } = useWorkspace(profile);
 
   const activeFile = state.files.find((f) => f.path === state.activePath);
@@ -47,6 +49,7 @@ export default function WorkspacePage() {
       ? (outcome.skill.frontmatter.data["name"] as string)
       : undefined;
   const hasError = outcome.kind !== "skill" || outcome.findings.some((f) => f.severity === "error");
+  const publishDir = ((state.dirName || skillName || "skill").trim() || "skill");
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-neutral-950 text-neutral-100">
@@ -66,13 +69,21 @@ export default function WorkspacePage() {
         >
           Open…
         </button>
-        <div className="ml-auto">
-          <ExportButtons
-            files={state.files}
-            dirName={state.dirName}
-            skillName={skillName}
-            hasError={hasError}
-          />
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowPublish(true)}
+            disabled={hasError}
+            title={hasError ? "Fix every error before publishing" : undefined}
+            className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
+              hasError
+                ? "cursor-not-allowed border-neutral-800 bg-neutral-900 text-neutral-600"
+                : "border-neutral-700 bg-neutral-800 text-neutral-100 hover:bg-neutral-700"
+            }`}
+          >
+            Publish to GitHub
+          </button>
+          <ExportButtons files={state.files} dirName={state.dirName} skillName={skillName} hasError={hasError} />
         </div>
       </header>
 
@@ -130,6 +141,13 @@ export default function WorkspacePage() {
           </aside>
         </div>
       )}
+
+      <PublishDialog
+        open={showPublish}
+        onClose={() => setShowPublish(false)}
+        files={state.files}
+        dirName={publishDir}
+      />
     </div>
   );
 }
