@@ -41,6 +41,11 @@ describe("E10 tabs in frontmatter", () => {
     const out = findingsFor([{ path: "SKILL.md", content: `---\nname: demo\ndescription: ok\nmetadata:\n\tauthor: me\n---\nbody` }]);
     expect(out.map((f) => f.ruleId)).toContain("E10");
   });
+
+  it("does not fire on a tab inside a value (not indentation)", () => {
+    const out = findingsFor([{ path: "SKILL.md", content: `---\nname: demo\ndescription: a \tb\n---\nbody` }]);
+    expect(out.map((f) => f.ruleId)).not.toContain("E10");
+  });
 });
 
 describe("E11 no README inside skill folder", () => {

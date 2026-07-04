@@ -43,6 +43,9 @@ describe("E02 name format", () => {
   ])("fires on %s", (_label, fm) => {
     expect(idsFor(fm)).toContain("E02");
   });
+  it("passes a name of exactly 64 chars", () => {
+    expect(idsFor(`name: ${"a".repeat(64)}\ndescription: Use when testing`)).not.toContain("E02");
+  });
 });
 
 describe("E03 reserved words", () => {
@@ -70,6 +73,9 @@ describe("E05 description", () => {
     expect(idsFor("name: a-b\ndescription: one\ndescription: two")).toContain("E05");
     expect(idsFor("name: a-b\ndescription: Use when testing")).not.toContain("E05");
   });
+  it("passes a description of exactly 1024 chars", () => {
+    expect(idsFor(`name: a-b\ndescription: ${"x".repeat(1024)}`)).not.toContain("E05");
+  });
 });
 
 describe("E06 no angle brackets in frontmatter values", () => {
@@ -78,11 +84,17 @@ describe("E06 no angle brackets in frontmatter values", () => {
     expect(idsFor("name: a-b\ndescription: ok\nmetadata:\n  author: <me>")).toContain("E06");
     expect(idsFor("name: a-b\ndescription: ok")).not.toContain("E06");
   });
+  it("fires on < or > inside an array element", () => {
+    expect(idsFor("name: a-b\ndescription: ok\nmetadata:\n  tags:\n    - \"has <angle>\"")).toContain("E06");
+  });
 });
 
 describe("E07 compatibility length", () => {
   it("fires only above 500 chars", () => {
     expect(idsFor(`name: a-b\ndescription: ok\ncompatibility: ${"c".repeat(501)}`)).toContain("E07");
     expect(idsFor("name: a-b\ndescription: ok\ncompatibility: Requires Claude Code")).not.toContain("E07");
+  });
+  it("passes compatibility of exactly 500 chars", () => {
+    expect(idsFor(`name: a-b\ndescription: ok\ncompatibility: ${"c".repeat(500)}`)).not.toContain("E07");
   });
 });

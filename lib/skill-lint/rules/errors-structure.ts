@@ -50,7 +50,7 @@ const e10: Rule = {
     const lines = s.frontmatter.raw.split("\n");
     const out: Finding[] = [];
     lines.forEach((l, i) => {
-      if (/^\t| \t/.test(l)) {
+      if (/^[ \t]*\t/.test(l)) {
         out.push(
           mk("E10", "error", "Tab character in frontmatter indentation",
             "YAML forbids tabs for indentation — the frontmatter will fail to parse in strict loaders.",
