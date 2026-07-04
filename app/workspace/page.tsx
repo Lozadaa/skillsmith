@@ -28,7 +28,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium ${
-        active ? "border-b-2 border-sky-500 text-neutral-100" : "text-neutral-400 hover:text-neutral-200"
+        active ? "border-b-2 border-ember text-ink" : "text-ink-soft hover:text-ink"
       }`}
     >
       {children}
@@ -52,12 +52,12 @@ export default function WorkspacePage() {
   const publishDir = ((state.dirName || skillName || "skill").trim() || "skill");
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-neutral-950 text-neutral-100">
-      <header className="flex flex-wrap items-center gap-3 border-b border-neutral-800 px-4 py-2">
+    <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-paper text-ink">
+      <header className="flex flex-wrap items-center gap-3 border-b-2 border-ink px-4 py-2">
         {outcome.kind === "skill" ? (
           <ScoreBadge score={outcome.score} />
         ) : (
-          <span className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-300">
+          <span className="ink-panel px-3 py-1.5 text-sm font-medium text-severity-warning">
             Not a skill
           </span>
         )}
@@ -65,7 +65,7 @@ export default function WorkspacePage() {
         <button
           type="button"
           onClick={() => setShowOpen((v) => !v)}
-          className="rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm hover:bg-neutral-700"
+          className="ink-btn px-3 py-1.5 text-sm"
         >
           Open…
         </button>
@@ -75,11 +75,7 @@ export default function WorkspacePage() {
             onClick={() => setShowPublish(true)}
             disabled={hasError}
             title={hasError ? "Fix every error before publishing" : undefined}
-            className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
-              hasError
-                ? "cursor-not-allowed border-neutral-800 bg-neutral-900 text-neutral-600"
-                : "border-neutral-700 bg-neutral-800 text-neutral-100 hover:bg-neutral-700"
-            }`}
+            className="ink-btn px-3 py-1.5 text-sm font-medium"
           >
             Publish to GitHub
           </button>
@@ -88,7 +84,7 @@ export default function WorkspacePage() {
       </header>
 
       {showOpen && (
-        <div className="border-b border-neutral-800 bg-neutral-900/60 p-4">
+        <div className="border-b-2 border-ink bg-paper p-4">
           <AnalyzeEntry
             onSkill={({ files, dirName }) => {
               dispatch({ type: "loadFiles", files, dirName });
@@ -102,7 +98,7 @@ export default function WorkspacePage() {
         <NotASkillPanel reason={outcome.reason} onStartTemplate={() => dispatch({ type: "reset" })} />
       ) : (
         <div className="grid flex-1 grid-cols-1 overflow-hidden md:grid-cols-[220px_1fr_360px]">
-          <aside className="hidden border-r border-neutral-800 md:block">
+          <aside className="hidden border-r-2 border-ink md:block">
             <FileTree
               files={state.files}
               activePath={state.activePath}
@@ -111,15 +107,15 @@ export default function WorkspacePage() {
               onDelete={(p) => dispatch({ type: "deleteFile", path: p })}
             />
           </aside>
-          <main className="min-h-0 border-r border-neutral-800">
+          <main className="min-h-0 border-r-2 border-ink">
             <Editor file={activeFile} onChange={(c) => dispatch({ type: "editActive", content: c })} />
           </main>
           <aside className="flex min-h-0 flex-col">
-            <div className="flex border-b border-neutral-800">
+            <div className="flex border-b-2 border-ink">
               <TabButton active={tab === "findings"} onClick={() => setTab("findings")}>
                 Findings
                 {outcome.findings.length > 0 && (
-                  <span className="ml-1 rounded-full bg-neutral-700 px-1.5 text-xs">
+                  <span className="ml-1 rounded-full border border-ink px-1.5 text-xs">
                     {outcome.findings.length}
                   </span>
                 )}

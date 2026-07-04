@@ -4,12 +4,8 @@ import { useState } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
 import { downloadBlob, zipSkill } from "@/lib/zip";
 
-function btnCls(disabled: boolean): string {
-  return `rounded-md border px-3 py-1.5 text-sm font-medium ${
-    disabled
-      ? "cursor-not-allowed border-neutral-800 bg-neutral-900 text-neutral-600"
-      : "border-neutral-700 bg-neutral-800 text-neutral-100 hover:bg-neutral-700"
-  }`;
+function btnCls(): string {
+  return "ink-btn px-3 py-1.5 text-sm font-medium";
 }
 
 export function ExportButtons({
@@ -48,13 +44,13 @@ export function ExportButtons({
   const gateTitle = hasError ? "Fix every error before exporting a package" : undefined;
   return (
     <div className="flex items-center gap-2">
-      <button type="button" onClick={onZip} disabled={hasError} title={gateTitle} className={btnCls(hasError)}>
+      <button type="button" onClick={onZip} disabled={hasError} title={gateTitle} className={btnCls()}>
         Download .zip
       </button>
-      <button type="button" onClick={onSkill} disabled={hasError} title={gateTitle} className={btnCls(hasError)}>
+      <button type="button" onClick={onSkill} disabled={hasError} title={gateTitle} className={btnCls()}>
         Download .skill
       </button>
-      <button type="button" onClick={onCopy} className={btnCls(false)}>
+      <button type="button" onClick={onCopy} className={btnCls()}>
         {copied ? "Copied!" : "Copy SKILL.md"}
       </button>
     </div>

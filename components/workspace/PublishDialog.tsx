@@ -117,17 +117,17 @@ export function PublishDialog({
   const publishing = state.s === "publishing";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="Publish to GitHub">
-      <div className="w-full max-w-lg rounded-lg border border-neutral-700 bg-neutral-900 p-5 text-neutral-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" role="dialog" aria-modal="true" aria-label="Publish to GitHub">
+      <div className="ink-panel-b w-full max-w-lg p-5 text-ink">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Publish to GitHub</h2>
-          <button type="button" onClick={onClose} className="text-neutral-400 hover:text-neutral-200">
+          <h2 className="font-display text-lg">Publish to GitHub</h2>
+          <button type="button" onClick={onClose} className="text-ink-soft hover:text-ink">
             Close
           </button>
         </div>
 
         <div className="mt-4 flex flex-col gap-1">
-          <label htmlFor="pub-token" className="text-sm text-neutral-300">
+          <label htmlFor="pub-token" className="text-sm text-ink-soft">
             Personal access token
           </label>
           <input
@@ -137,18 +137,18 @@ export function PublishDialog({
             onChange={(e) => updateToken(e.target.value)}
             placeholder="ghp_…"
             autoComplete="off"
-            className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
+            className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
           />
-          <span className="text-xs text-neutral-500">Needs a token with repo scope — stored locally only, never sent anywhere but github.com.</span>
+          <span className="text-xs text-ink-soft">Needs a token with repo scope — stored locally only, never sent anywhere but github.com.</span>
         </div>
 
         <fieldset className="mt-4">
-          <legend className="text-sm text-neutral-300">Destination</legend>
-          <label className="mt-1 flex items-center gap-2 text-sm">
+          <legend className="text-sm text-ink-soft">Destination</legend>
+          <label className="mt-1 flex items-center gap-2 text-sm text-ink">
             <input type="radio" name="pub-mode" checked={mode === "new-repo"} onChange={() => setMode("new-repo")} />
             New repository
           </label>
-          <label className="mt-1 flex items-center gap-2 text-sm">
+          <label className="mt-1 flex items-center gap-2 text-sm text-ink">
             <input type="radio" name="pub-mode" aria-label="Existing repository" checked={mode === "existing"} onChange={() => setMode("existing")} />
             Existing repository
           </label>
@@ -156,54 +156,54 @@ export function PublishDialog({
 
         {mode === "new-repo" ? (
           <div className="mt-3 flex flex-col gap-2">
-            <label htmlFor="pub-name" className="text-sm text-neutral-300">Repository name</label>
+            <label htmlFor="pub-name" className="text-sm text-ink-soft">Repository name</label>
             <input
               id="pub-name"
               value={repoName}
               onChange={(e) => setRepoName(e.target.value)}
-              className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
+              className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm text-ink">
               <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
               Private repository
             </label>
           </div>
         ) : (
           <div className="mt-3 flex flex-col gap-2">
-            <label htmlFor="pub-repo" className="text-sm text-neutral-300">owner/repo</label>
+            <label htmlFor="pub-repo" className="text-sm text-ink-soft">owner/repo</label>
             <input
               id="pub-repo"
               value={ownerRepo}
               onChange={(e) => setOwnerRepo(e.target.value)}
               placeholder="me/my-monorepo"
-              className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
+              className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
-            <label htmlFor="pub-branch" className="text-sm text-neutral-300">Branch (optional — defaults to the repo default)</label>
+            <label htmlFor="pub-branch" className="text-sm text-ink-soft">Branch (optional — defaults to the repo default)</label>
             <input
               id="pub-branch"
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
               placeholder="main"
-              className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
+              className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
-            <label htmlFor="pub-prefix" className="text-sm text-neutral-300">Path prefix</label>
+            <label htmlFor="pub-prefix" className="text-sm text-ink-soft">Path prefix</label>
             <input
               id="pub-prefix"
               value={pathPrefix}
               onChange={(e) => setPathPrefix(e.target.value)}
-              className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
+              className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
-            <span className="text-xs text-neutral-500">Files already at this path will be replaced by this commit.</span>
+            <span className="text-xs text-ink-soft">Files already at this path will be replaced by this commit.</span>
           </div>
         )}
 
         <div className="mt-3 flex flex-col gap-1">
-          <label htmlFor="pub-message" className="text-sm text-neutral-300">Commit message</label>
+          <label htmlFor="pub-message" className="text-sm text-ink-soft">Commit message</label>
           <input
             id="pub-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm"
+            className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
           />
         </div>
 
@@ -212,18 +212,18 @@ export function PublishDialog({
             type="button"
             onClick={onPublish}
             disabled={publishing}
-            className="rounded-md border border-sky-600 bg-sky-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="ink-btn px-4 py-1.5 text-sm font-medium"
           >
             {publishing ? "Publishing…" : "Publish"}
           </button>
-          {publishing && <span className="text-sm text-neutral-400">Creating commit…</span>}
+          {publishing && <span className="text-sm text-ink-soft">Creating commit…</span>}
         </div>
 
         {state.s === "error" && (
-          <p className="mt-3 rounded border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">{state.message}</p>
+          <p className="mt-3 rounded border-2 border-severity-error px-3 py-2 text-sm text-severity-error">{state.message}</p>
         )}
         {state.s === "done" && (
-          <div className="mt-3 rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+          <div className="mt-3 rounded border-2 border-ink px-3 py-2 text-sm text-ink">
             <p>
               Published to{" "}
               <a href={state.htmlUrl} target="_blank" rel="noreferrer" className="underline">
@@ -232,7 +232,7 @@ export function PublishDialog({
               .
             </p>
             {state.skipped.length > 0 && (
-              <p className="mt-1 text-emerald-300/80">Skipped {state.skipped.length} symlink file(s): {state.skipped.join(", ")}</p>
+              <p className="mt-1 text-ink-soft">Skipped {state.skipped.length} symlink file(s): {state.skipped.join(", ")}</p>
             )}
           </div>
         )}

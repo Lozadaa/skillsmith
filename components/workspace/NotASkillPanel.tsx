@@ -9,13 +9,13 @@ export function NotASkillPanel({
 }) {
   return (
     <div className="flex flex-1 items-center justify-center p-8 text-center">
-      <div className="max-w-md rounded-xl border border-amber-500/30 bg-amber-500/5 p-6">
-        <h2 className="text-lg font-semibold text-amber-200">This doesn&apos;t look like a skill</h2>
-        <p className="mt-2 text-sm text-neutral-300">{reason}</p>
+      <div className="ink-panel max-w-md p-6">
+        <h2 className="font-display text-xl text-severity-warning">This doesn&apos;t look like a skill</h2>
+        <p className="mt-2 text-sm text-ink">{reason}</p>
         <button
           type="button"
           onClick={onStartTemplate}
-          className="mt-4 rounded-md border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm text-neutral-100 hover:bg-neutral-700"
+          className="ink-btn mt-4 px-4 py-2 text-sm"
         >
           Start from template
         </button>

@@ -3,9 +3,9 @@
 import type { Finding, Severity } from "@/lib/skill-lint";
 
 const SEVERITY_META: Record<Severity, { label: string; dot: string; badge: string }> = {
-  error: { label: "Errors", dot: "bg-red-500", badge: "border-red-500/30 bg-red-500/15 text-red-300" },
-  warning: { label: "Warnings", dot: "bg-amber-500", badge: "border-amber-500/30 bg-amber-500/15 text-amber-300" },
-  suggestion: { label: "Suggestions", dot: "bg-sky-500", badge: "border-sky-500/30 bg-sky-500/15 text-sky-300" },
+  error: { label: "Errors", dot: "bg-severity-error", badge: "border-severity-error text-severity-error" },
+  warning: { label: "Warnings", dot: "bg-severity-warning", badge: "border-severity-warning text-severity-warning" },
+  suggestion: { label: "Suggestions", dot: "bg-ink-soft", badge: "border-ink-soft text-ink-soft" },
 };
 
 const ORDER: Severity[] = ["error", "warning", "suggestion"];
@@ -19,7 +19,7 @@ export function FindingsPanel({
 }) {
   if (findings.length === 0) {
     return (
-      <div className="p-6 text-sm text-neutral-400">
+      <div className="p-6 text-sm text-ink-soft">
         No findings. This skill passes every enabled rule.
       </div>
     );
@@ -32,7 +32,7 @@ export function FindingsPanel({
         const meta = SEVERITY_META[sev];
         return (
           <section key={sev}>
-            <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+            <h3 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">
               <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
               {meta.label}
               <span className={`rounded-full border px-1.5 py-0.5 text-[10px] ${meta.badge}`}>{group.length}</span>
@@ -41,39 +41,39 @@ export function FindingsPanel({
               {group.map((f, i) => (
                 <li
                   key={`${f.ruleId}-${i}`}
-                  className="rounded-lg border border-neutral-800 bg-neutral-900/60 p-3"
+                  className="ink-panel p-3"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="rounded bg-neutral-800 px-1.5 py-0.5 font-mono text-[11px] text-neutral-300">
+                    <span className="rounded border border-ink px-1.5 py-0.5 font-mono text-[11px] text-ink">
                       {f.ruleId}
                     </span>
                     {typeof f.line === "number" && (
-                      <span className="font-mono text-[11px] text-neutral-500">L{f.line}</span>
+                      <span className="font-mono text-[11px] text-ink-soft">L{f.line}</span>
                     )}
                     {f.file && f.file !== "SKILL.md" && (
-                      <span className="font-mono text-[11px] text-neutral-500">{f.file}</span>
+                      <span className="font-mono text-[11px] text-ink-soft">{f.file}</span>
                     )}
                     {f.fix && (
                       <button
                         type="button"
                         onClick={() => onApplyFix(f)}
-                        className="ml-auto rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 hover:bg-emerald-500/20"
+                        className="ink-btn ml-auto px-2 py-1 text-xs font-medium"
                       >
                         {f.fix.label || "Apply fix"}
                       </button>
                     )}
                   </div>
-                  <p className="mt-2 text-sm text-neutral-100">{f.message}</p>
-                  <details className="mt-1 text-sm text-neutral-400">
-                    <summary className="cursor-pointer select-none text-xs text-neutral-500 hover:text-neutral-300">
+                  <p className="mt-2 text-sm text-ink">{f.message}</p>
+                  <details className="mt-1 text-sm text-ink-soft">
+                    <summary className="cursor-pointer select-none text-xs text-ink-soft hover:text-ink">
                       Why it matters &amp; how to fix
                     </summary>
                     <p className="mt-2">
-                      <span className="font-medium text-neutral-300">Why: </span>
+                      <span className="font-medium text-ink">Why: </span>
                       {f.why}
                     </p>
                     <p className="mt-1">
-                      <span className="font-medium text-neutral-300">Fix: </span>
+                      <span className="font-medium text-ink">Fix: </span>
                       {f.howToFix}
                     </p>
                   </details>

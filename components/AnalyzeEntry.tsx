@@ -98,7 +98,7 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <div className="flex flex-col">
-        <label htmlFor="analyze-paste" className="mb-1 text-sm font-medium text-neutral-300">
+        <label htmlFor="analyze-paste" className="mb-1 text-sm font-medium text-ink">
           Paste a SKILL.md
         </label>
         <textarea
@@ -106,13 +106,13 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           value={paste}
           onChange={(e) => setPaste(e.target.value)}
           placeholder={"---\nname: my-skill\ndescription: Use when …\n---\n# Body"}
-          className="h-40 w-full resize-none rounded-lg border border-neutral-800 bg-neutral-950 p-3 font-mono text-xs text-neutral-100 outline-none placeholder:text-neutral-600"
+          className="ink-panel h-40 w-full resize-none p-3 font-mono text-xs text-ink outline-none placeholder:text-ink-soft/60"
         />
         <button
           type="button"
           onClick={submitPaste}
           disabled={!paste.trim()}
-          className="mt-2 self-start rounded-md border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-sm font-medium text-sky-300 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ink-btn mt-2 self-start px-3 py-1.5 text-sm font-medium"
         >
           Analyze
         </button>
@@ -129,23 +129,23 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           setDragging(false);
           void handleFiles(e.dataTransfer.files);
         }}
-        className={`flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-6 text-center ${
-          dragging ? "border-sky-500 bg-sky-500/5" : "border-neutral-700"
+        className={`flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-6 text-center ${
+          dragging ? "border-ember bg-ember/5" : "border-ink-soft"
         }`}
       >
-        <p className="text-sm text-neutral-400">Drop a folder or a .zip / .skill here, or</p>
+        <p className="text-sm text-ink-soft">Drop a folder or a .zip / .skill here, or</p>
         <div className="flex flex-wrap justify-center gap-2">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-neutral-100 hover:bg-neutral-700"
+            className="ink-btn px-3 py-1.5 text-sm"
           >
             Choose files / archive
           </button>
           <button
             type="button"
             onClick={() => dirInputRef.current?.click()}
-            className="rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-neutral-100 hover:bg-neutral-700"
+            className="ink-btn px-3 py-1.5 text-sm"
           >
             Choose folder
           </button>
@@ -169,7 +169,7 @@ export function AnalyzeEntry({ onSkill }: { onSkill: (result: AnalyzeResult) => 
           webkitdirectory=""
           onChange={(e) => void handleFiles(e.target.files)}
         />
-        {error && <p className="text-xs text-amber-400">{error}</p>}
+        {error && <p className="text-xs text-severity-warning">{error}</p>}
       </div>
     </div>
   );

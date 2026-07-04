@@ -45,7 +45,7 @@ export function TokensPanel({ tokens }: { tokens: TokenReport }) {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-ink-soft">
         ~estimated — Anthropic does not publish the Claude 3+ tokenizer, so these are heuristic counts.
       </p>
       <ul className="flex flex-col gap-4">
@@ -54,24 +54,24 @@ export function TokensPanel({ tokens }: { tokens: TokenReport }) {
           return (
             <li key={r.key}>
               <div className="flex items-baseline justify-between text-sm">
-                <span className="text-neutral-200">{r.label}</span>
-                <span className="font-mono text-neutral-400">
+                <span className="text-ink">{r.label}</span>
+                <span className="font-mono text-ink-soft">
                   {r.value} {r.unit === "tokens" ? "tok" : r.value === 1 ? "file" : "files"}
                 </span>
               </div>
               {r.unit === "tokens" && (
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-neutral-800">
-                  <div className="h-full rounded-full bg-sky-500" style={{ width: `${pct}%` }} />
+                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-ink/10">
+                  <div className="h-full rounded-full bg-ink" style={{ width: `${pct}%` }} />
                 </div>
               )}
-              <p className="mt-1 text-xs text-neutral-500">{r.note}</p>
+              <p className="mt-1 text-xs text-ink-soft">{r.note}</p>
             </li>
           );
         })}
       </ul>
-      <div className="flex items-baseline justify-between border-t border-neutral-800 pt-3 text-sm">
-        <span className="font-medium text-neutral-100">Total context (metadata + body + references)</span>
-        <span className="font-mono text-neutral-200">{tokens.total} tok</span>
+      <div className="flex items-baseline justify-between border-t-2 border-ink pt-3 text-sm">
+        <span className="font-medium text-ink">Total context (metadata + body + references)</span>
+        <span className="font-mono text-ink">{tokens.total} tok</span>
       </div>
     </div>
   );

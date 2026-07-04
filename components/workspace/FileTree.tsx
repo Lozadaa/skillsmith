@@ -38,8 +38,8 @@ export function FileTree({
                 onClick={() => onSelect(f.path)}
                 className={`flex-1 truncate rounded px-2 py-1 text-left font-mono text-xs ${
                   f.path === activePath
-                    ? "bg-neutral-800 text-neutral-100"
-                    : "text-neutral-400 hover:bg-neutral-900"
+                    ? "bg-ink text-paper"
+                    : "text-ink-soft hover:bg-ink/5"
                 }`}
               >
                 {f.path}
@@ -49,7 +49,7 @@ export function FileTree({
                   type="button"
                   aria-label={`Delete ${f.path}`}
                   onClick={() => onDelete(f.path)}
-                  className="ml-1 px-1 text-neutral-600 opacity-0 hover:text-red-400 focus:opacity-100 group-hover:opacity-100"
+                  className="ml-1 px-1 text-ink-soft opacity-0 hover:text-severity-error focus:opacity-100 group-hover:opacity-100"
                 >
                   ×
                 </button>
@@ -57,13 +57,13 @@ export function FileTree({
             </li>
           ))}
       </ul>
-      <form onSubmit={submit} className="border-t border-neutral-800 p-2">
+      <form onSubmit={submit} className="border-t-2 border-ink p-2">
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="add file e.g. references/api.md"
           aria-label="New file path"
-          className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 font-mono text-xs text-neutral-100 placeholder:text-neutral-600"
+          className="w-full rounded border-2 border-ink bg-paper px-2 py-1 font-mono text-xs text-ink placeholder:text-ink-soft/60"
         />
       </form>
     </div>
