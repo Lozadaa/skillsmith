@@ -2,18 +2,18 @@ import Link from "next/link";
 
 export function SiteHeader() {
   return (
-    <header className="flex h-14 items-center gap-6 border-b border-neutral-800 bg-neutral-950 px-4 text-sm">
-      <Link href="/" className="font-semibold text-neutral-100">
+    <header className="flex h-14 items-center gap-6 border-b-2 border-ink bg-paper px-4 text-sm">
+      <Link href="/" className="ink-underline font-display text-xl text-ink hover:text-ember">
         Skillsmith
       </Link>
-      <nav className="flex items-center gap-4 text-neutral-400">
-        <Link href="/new" className="hover:text-neutral-100">
+      <nav className="flex items-center gap-5 text-ink-soft">
+        <Link href="/new" className="ink-underline hover:text-ember">
           Create
         </Link>
-        <Link href="/workspace" className="hover:text-neutral-100">
+        <Link href="/workspace" className="ink-underline hover:text-ember">
           Workspace
         </Link>
-        <Link href="/import" className="hover:text-neutral-100">
+        <Link href="/import" className="ink-underline hover:text-ember">
           Import
         </Link>
       </nav>
