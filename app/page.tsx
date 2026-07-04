@@ -87,6 +87,9 @@ export default function Home() {
         <img
           src="/blacksmith.png"
           alt="A blacksmith hammering hot metal on an anvil — hand-drawn in ink."
+          width={560}
+          height={700}
+          loading="eager"
           className="w-full max-w-md justify-self-center md:justify-self-end"
         />
       </section>

@@ -42,7 +42,7 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
 
   const header = (key: SortKey, label: string) => (
     <th className="py-2 pr-4">
-      <button type="button" onClick={() => sortBy(key)} className="ink-underline font-medium text-ink hover:text-ember">
+      <button type="button" onClick={() => sortBy(key)} className="ink-underline font-medium text-ink hover:text-ember-deep">
         {label}
       </button>
     </th>
@@ -52,7 +52,7 @@ export default function CollectionAudit({ skills }: { skills: PickerSkill[] }) {
     <div className="ink-panel mb-4 overflow-x-auto p-3">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-display text-lg text-ink">Collection audit — {scanned.length} skills</h2>
-        <button type="button" onClick={() => setOpen(false)} className="ink-underline text-xs text-ink-soft hover:text-ember">
+        <button type="button" onClick={() => setOpen(false)} className="ink-underline text-xs text-ink-soft hover:text-ember-deep">
           Hide
         </button>
       </div>

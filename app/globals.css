@@ -59,12 +59,6 @@
     background-color: var(--color-paper);
     border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
   }
-  /* Radius set C */
-  .ink-panel-c {
-    border: 2px solid var(--color-ink);
-    background-color: var(--color-paper);
-    border-radius: 225px 15px 255px 12px / 12px 255px 15px 225px;
-  }
 
   /* Letterpress button: paper fill, wobbly ink border, hard offset shadow.
      Hover heats to ember; active presses in; disabled reads as pencil. */

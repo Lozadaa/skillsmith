@@ -13,7 +13,7 @@ export default function TokenField({
 }) {
   return (
     <div className="mt-2 text-sm">
-      <button type="button" onClick={() => onToggle(!open)} className="ink-underline text-ink hover:text-ember">
+      <button type="button" onClick={() => onToggle(!open)} className="ink-underline text-ink hover:text-ember-deep">
         {open ? "Hide" : "GitHub token (optional)"}
       </button>
       {open && (

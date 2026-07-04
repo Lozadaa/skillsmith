@@ -10,7 +10,7 @@ export function StepIndicator({ step }: { step: number }) {
         const state = n === step ? "current" : n < step ? "done" : "todo";
         const badge =
           state === "current"
-            ? "border-ember bg-ember text-paper"
+            ? "border-ember bg-ember-deep text-paper"
             : state === "done"
               ? "border-ink bg-ink text-paper"
               : "border-ink-soft text-ink-soft";
