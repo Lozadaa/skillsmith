@@ -92,7 +92,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
     setBulk({ running: true, step: "Preparing…" });
     try {
       const refs = result.skills.map((s) => s.ref);
-      const { zips } = await fetchAllSkills(
+      const { zips, skipped } = await fetchAllSkills(
         makeClient(),
         result.owner,
         result.repo,
@@ -102,10 +102,17 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         (step) => setBulk({ running: true, step })
       );
       downloadBlob(`${result.repo}-skills.zip`, zipCollection(zips), "application/zip");
+      setBulk({
+        running: false,
+        step:
+          skipped.length > 0
+            ? `Done — ${zips.length} skills downloaded, ${skipped.length} item(s) skipped.`
+            : "",
+      });
     } catch (error) {
       setView({ s: "error", error });
-    } finally {
       setBulk({ running: false, step: "" });
+    } finally {
       setBusyDir(null);
     }
   }
@@ -208,13 +215,13 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
               <div className="mb-2 flex items-center gap-3">
                 <button
                   type="button"
-                  disabled={bulk.running}
+                  disabled={bulk.running || busyDir !== null}
                   onClick={() => view.result.mode === "picker" && downloadAll(view.result)}
                   className="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-50"
                 >
                   {bulk.running ? "Downloading…" : "Download all (.zip)"}
                 </button>
-                {bulk.running && <span className="text-sm text-gray-600">{bulk.step}</span>}
+                {bulk.step && <span className="text-sm text-gray-600">{bulk.step}</span>}
               </div>
             )}
             <SkillPicker

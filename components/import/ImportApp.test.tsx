@@ -173,4 +173,69 @@ describe("ImportApp", () => {
     expect(downloadBlob.mock.calls[0][0]).toBe("r-skills.zip");
     expect(downloadBlob.mock.calls[0][2]).toBe("application/zip");
   });
+
+  it("disables Download all while a single row's Open fetch is in flight", async () => {
+    let resolveBlob: (v: string) => void = () => {};
+    let aCalls = 0;
+    const slowClient: GitHubClient = {
+      getRepoTree: async () => ({
+        entries: [
+          { path: "skills/alpha/SKILL.md", mode: "100644", type: "blob", sha: "a" },
+          { path: "skills/beta/SKILL.md", mode: "100644", type: "blob", sha: "b" },
+        ],
+        truncated: false,
+      }),
+      getBlobText: (_o, _r, sha) => {
+        // First call per sha is the picker's mini-lint scan; only the *second*
+        // call for "a" (the openSkill fetch) hangs, mirroring the existing
+        // "disables every Open button" test above.
+        if (sha === "a") {
+          aCalls++;
+          if (aCalls > 1) return new Promise((resolve) => (resolveBlob = resolve));
+        }
+        return Promise.resolve(SKILL_MD);
+      },
+      getReadme: async () => "",
+      getGistFiles: async () => [],
+    };
+    render(<ImportApp createClientFn={() => slowClient} />);
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    const openButtons = await screen.findAllByRole("button", { name: /^open|opening/i });
+    fireEvent.click(openButtons[0]);
+
+    await vi.waitFor(() => {
+      const dl = screen.getByRole("button", { name: /download all/i }) as HTMLButtonElement;
+      expect(dl.disabled).toBe(true);
+    });
+
+    resolveBlob(SKILL_MD);
+    await vi.waitFor(() => expect(stash).toHaveBeenCalledTimes(1));
+  });
+
+  it("shows a completion note listing skipped items after a bulk download", async () => {
+    downloadBlob.mockClear();
+    const clientWithOversizedBeta: GitHubClient = {
+      getRepoTree: async () => ({
+        entries: [
+          { path: "skills/alpha/SKILL.md", mode: "100644", type: "blob", sha: "a" },
+          { path: "skills/beta/SKILL.md", mode: "100644", type: "blob", sha: "b", size: 3 * 1024 * 1024 },
+        ],
+        truncated: false,
+      }),
+      getBlobText: async () => SKILL_MD,
+      getReadme: async () => "",
+      getGistFiles: async () => [],
+    };
+    render(<ImportApp createClientFn={() => clientWithOversizedBeta} />);
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    const dl = await screen.findByRole("button", { name: /download all/i });
+    fireEvent.click(dl);
+
+    await vi.waitFor(() => expect(downloadBlob).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText(/1 skills? downloaded, 1 item\(s\) skipped/i)).toBeTruthy();
+  });
 });
