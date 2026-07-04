@@ -4,4 +4,4 @@
 # Linux binding even though the lockfile lists it. A fresh `npm install`
 # resolves the correct native binary on Railway's Linux builder.
 [phases.install]
-cmds = ["npm install --no-audit --no-fund"]
+cmds = ["rm -f package-lock.json && npm install --no-audit --no-fund"]
