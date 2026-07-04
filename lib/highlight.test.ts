@@ -112,3 +112,45 @@ describe("highlightSkillMd — kind assignment", () => {
     expect(listTokens[1]!.text).toBe("1.");
   });
 });
+
+describe("highlightSkillMd — CRLF tolerance", () => {
+  const CRLF_FIXTURE =
+    "---\r\nname: my-skill\r\ndescription: Use when testing CRLF\r\n---\r\n# Heading One\r\n\r\n```ts\r\nconst x = 1;\r\n```\r\n";
+
+  it("stays lossless on CRLF input", () => {
+    expect(joined(CRLF_FIXTURE)).toBe(CRLF_FIXTURE);
+  });
+
+  it("still tags name: as fm-key when the file uses CRLF line endings", () => {
+    const tokens = highlightSkillMd(CRLF_FIXTURE);
+    const keyToken = tokens.find((t) => t.kind === "fm-key" && t.text === "name:");
+    expect(keyToken).toBeDefined();
+  });
+
+  it("still recognizes both frontmatter delimiters with CRLF line endings", () => {
+    const tokens = highlightSkillMd(CRLF_FIXTURE);
+    const delims = tokens.filter((t) => t.kind === "fm-delim");
+    expect(delims.length).toBe(2);
+  });
+
+  it("still tags the heading line with CRLF line endings", () => {
+    const tokens = highlightSkillMd(CRLF_FIXTURE);
+    const heading = tokens.find((t) => t.kind === "heading");
+    expect(heading).toBeDefined();
+    expect(heading!.text).toContain("# Heading One");
+  });
+});
+
+describe("highlightSkillMd — inline scan bail-out on pathological lines", () => {
+  it("tokenizes a 50,000-char unmatched-bracket line quickly as a single text token", () => {
+    const pathological = "[".repeat(50_000) + "\n";
+    const start = performance.now();
+    const tokens = highlightSkillMd(pathological);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(250);
+    expect(tokens.length).toBe(1);
+    expect(tokens[0]!.kind).toBe("text");
+    expect(tokens[0]!.text).toBe(pathological);
+  });
+});

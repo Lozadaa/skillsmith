@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
 import { highlightSkillMd, type TokenKind } from "@/lib/highlight";
 
@@ -21,6 +21,12 @@ const TOKEN_CLASS: Record<TokenKind, string> = {
   text: "text-ink",
 };
 
+/** Copy the textarea's scroll position onto the overlay <pre> so the two layers stay aligned. */
+function syncScroll(textarea: HTMLTextAreaElement, pre: HTMLPreElement) {
+  pre.scrollTop = textarea.scrollTop;
+  pre.scrollLeft = textarea.scrollLeft;
+}
+
 export function Editor({
   file,
   onChange,
@@ -29,6 +35,16 @@ export function Editor({
   onChange: (content: string) => void;
 }) {
   const preRef = useRef<HTMLPreElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Switching files can leave the overlay desynced from the textarea (e.g. if
+  // the previous file was scrolled and the new one loads at scrollTop 0), since
+  // the overlay only otherwise resyncs on the textarea's own onScroll event.
+  useEffect(() => {
+    if (preRef.current && textareaRef.current) {
+      syncScroll(textareaRef.current, preRef.current);
+    }
+  }, [file?.path]);
 
   if (!file) {
     return (
@@ -42,8 +58,7 @@ export function Editor({
 
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
     if (preRef.current) {
-      preRef.current.scrollTop = e.currentTarget.scrollTop;
-      preRef.current.scrollLeft = e.currentTarget.scrollLeft;
+      syncScroll(e.currentTarget, preRef.current);
     }
   };
 
@@ -65,11 +80,12 @@ export function Editor({
           ))}
           {/* Trailing-newline quirk: browsers collapse a source-final "\n" when
               measuring textarea content height, which would leave the overlay
-              one line short. Append a zero-width joiner so the last visual
+              one line short. Append a zero-width space so the last visual
               line always exists in both layers. */}
           {file.content.endsWith("\n") && "​"}
         </pre>
         <textarea
+          ref={textareaRef}
           value={file.content}
           onChange={(e) => onChange(e.target.value)}
           onScroll={handleScroll}

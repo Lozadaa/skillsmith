@@ -30,6 +30,18 @@ const FENCE_RE = /^(```|~~~)/;
 const LIST_RE = /^(\s*)([-*+]|\d+\.)(\s)(.*)$/;
 const INLINE_RE = /\[[^\]]*\]\([^)]*\)|`[^`]*`/g;
 
+/**
+ * Bail-out threshold for inline scanning. `tokenizeInline` is measured
+ * quadratic on pathological single lines (e.g. an unmatched `[` or backtick
+ * spam repeated many times): a 20k-char such line took ~114ms and an 80k-char
+ * line took ~1.9s to scan per keystroke in manual profiling. Real SKILL.md
+ * lines are far below this — the linter itself already flags bodies over
+ * 500 lines — so lines longer than this are rendered as a single plain
+ * "text" token with no inline scanning, keeping worst-case cost O(n) instead
+ * of O(n^2).
+ */
+const INLINE_SCAN_MAX = 2000;
+
 /** Split source into lines, each retaining its trailing "\n" (last line may have none). */
 function splitLines(source: string): string[] {
   if (source === "") return [];
@@ -47,8 +59,25 @@ function splitLines(source: string): string[] {
   return lines;
 }
 
+/**
+ * Strip a trailing "\n" and, if present, a preceding "\r" — for line
+ * classification only (frontmatter/heading/fence/list detection). The
+ * emitted token `text` always keeps the original bytes untouched, so this
+ * keeps CRLF input ("---\r\n") classifying the same as LF input ("---\n")
+ * without breaking losslessness.
+ */
+function stripEOL(line: string): string {
+  let s = line;
+  if (s.endsWith("\n")) s = s.slice(0, -1);
+  if (s.endsWith("\r")) s = s.slice(0, -1);
+  return s;
+}
+
 /** Tokenize inline markdown (links + inline code) within a plain text span, kind defaulting to "text". */
 function tokenizeInline(text: string): Token[] {
+  if (text.length > INLINE_SCAN_MAX) {
+    return [{ text, kind: "text" }];
+  }
   const tokens: Token[] = [];
   let lastIndex = 0;
   INLINE_RE.lastIndex = 0;
@@ -73,13 +102,13 @@ export function highlightSkillMd(source: string): Token[] {
 
   let i = 0;
 
-  // Frontmatter block: only recognized when line 1 is exactly "---" (+ newline or EOF).
-  if (lines.length > 0 && (lines[0] === "---\n" || lines[0] === "---")) {
+  // Frontmatter block: only recognized when line 1 is exactly "---" (+ newline, CRLF, or EOF).
+  if (lines.length > 0 && stripEOL(lines[0]!) === "---") {
     tokens.push({ text: lines[0]!, kind: "fm-delim" });
     i = 1;
     while (i < lines.length) {
       const line = lines[i]!;
-      const stripped = line.endsWith("\n") ? line.slice(0, -1) : line;
+      const stripped = stripEOL(line);
       if (stripped === "---") {
         tokens.push({ text: line, kind: "fm-delim" });
         i++;
@@ -101,7 +130,7 @@ export function highlightSkillMd(source: string): Token[] {
   let inFence = false;
   for (; i < lines.length; i++) {
     const line = lines[i]!;
-    const stripped = line.endsWith("\n") ? line.slice(0, -1) : line;
+    const stripped = stripEOL(line);
 
     if (FENCE_RE.test(stripped)) {
       tokens.push({ text: line, kind: "fence" });

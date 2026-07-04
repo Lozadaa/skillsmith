@@ -43,4 +43,26 @@ describe("Editor overlay highlighting", () => {
     const textarea = screen.getByLabelText("Editor for SKILL.md") as HTMLTextAreaElement;
     expect(textarea.value).toBe("hello");
   });
+
+  it("resyncs the overlay scroll position when switching to a different file", () => {
+    const { container, rerender } = render(
+      <Editor file={makeFile("line\n".repeat(200))} onChange={() => {}} />,
+    );
+    const textarea = screen.getByLabelText("Editor for SKILL.md") as HTMLTextAreaElement;
+    const pre = container.querySelector("pre[aria-hidden]") as HTMLPreElement;
+
+    // Simulate the first file having been scrolled down, leaving the overlay
+    // desynced (jsdom doesn't lay out scrollHeight, so set both directly).
+    Object.defineProperty(textarea, "scrollTop", { value: 500, configurable: true });
+    Object.defineProperty(pre, "scrollTop", { value: 0, writable: true, configurable: true });
+
+    rerender(
+      <Editor
+        file={{ path: "OTHER.md", content: "different content" }}
+        onChange={() => {}}
+      />,
+    );
+
+    expect(pre.scrollTop).toBe(textarea.scrollTop);
+  });
 });
