@@ -8,6 +8,7 @@ import { resolveTarget, type ImportResult, type PickerSkill } from "@/lib/github
 import { fetchSkillFiles } from "@/lib/github/fetchSkill";
 import type { RepoLink } from "@/lib/github/links";
 import TokenField from "./TokenField";
+import CollectionAudit from "./CollectionAudit";
 import SkillPicker from "./SkillPicker";
 import LinksList from "./LinksList";
 import ErrorPanel from "./ErrorPanel";
@@ -176,6 +177,7 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
             <p className="mb-2 text-sm text-gray-600">
               Found {view.result.skills.length} skill{view.result.skills.length === 1 ? "" : "s"}.
             </p>
+            {view.result.skills.length > 3 && <CollectionAudit skills={view.result.skills} />}
             <SkillPicker
               skills={view.result.skills}
               busyDir={busyDir}
