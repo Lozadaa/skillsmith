@@ -56,4 +56,11 @@ describe("extractFrontmatter", () => {
     const r = extractFrontmatter(`---\njust a scalar\n---\nbody`);
     expect(r!.frontmatter.parseError?.message).toMatch(/mapping/i);
   });
+
+  it("reports the correct 1-based line for an unrecoverable YAML error", () => {
+    const r = extractFrontmatter(`---\nname: ok\nbroken: [unterminated flow seq\n---\nbody`);
+    expect(r).not.toBeNull();
+    expect(r!.frontmatter.parseError).toBeDefined();
+    expect(r!.frontmatter.parseError!.line).toBe(3);
+  });
 });

@@ -67,7 +67,7 @@ function parseYamlTolerant(raw: string): Frontmatter {
     keyOccurrences: [],
     parseError: {
       message: err ? err.message.split("\n")[0] : "Invalid YAML frontmatter",
-      line: err ? offsetToLine(raw, err.pos[0]) + 1 : undefined,
+      line: err ? offsetToLine(raw, err.pos[0]) + 2 : undefined,
     },
   };
 }
