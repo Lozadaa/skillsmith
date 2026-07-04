@@ -26,6 +26,7 @@ describe("lintSkill end to end", () => {
     expect(r.kind).toBe("skill");
     if (r.kind === "skill") {
       expect(r.findings.filter((f) => f.severity === "error")).toEqual([]);
+      expect(r.findings.filter((f) => f.severity === "warning")).toEqual([]);
       expect(r.score.value).toBeGreaterThanOrEqual(90);
       expect(r.tokens.metadata).toBeGreaterThan(0);
       expect(r.tokens.references).toBeGreaterThan(0);
