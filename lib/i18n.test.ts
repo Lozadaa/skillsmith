@@ -78,6 +78,18 @@ describe("es/en key parity", () => {
     expect(esKeys).toEqual(enKeys);
   });
 
+  it("interpolation tokens match between locales (prevents split-render drift)", () => {
+    // Several components render a value inside markup by splitting on a
+    // {token} in the string (e.g. publishDialog.published on {url}). If a
+    // translation drops or renames the token, the interpolated value silently
+    // vanishes for that locale. Every key must carry the identical {tokens}
+    // in both en and es.
+    const tokens = (v: string) => (v.match(/\{[a-zA-Z0-9_]+\}/g) ?? []).sort();
+    for (const key of Object.keys(STRINGS.en)) {
+      expect(tokens(STRINGS.es[key]), `token mismatch in "${key}"`).toEqual(tokens(STRINGS.en[key]));
+    }
+  });
+
   it("no key resolves to an empty string in either locale", () => {
     const locales: Locale[] = ["en", "es"];
     for (const locale of locales) {

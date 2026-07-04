@@ -30,6 +30,13 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(detectLocale());
   }, []);
 
+  // Keep <html lang> in sync so screen readers and search engines announce the
+  // page in the language actually shown. Runs client-side only (the prerendered
+  // markup ships lang="en"), so it never causes a hydration mismatch.
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     try {
