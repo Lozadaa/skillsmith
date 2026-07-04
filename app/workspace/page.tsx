@@ -46,7 +46,7 @@ export default function WorkspacePage() {
     outcome.kind === "skill" && typeof outcome.skill.frontmatter.data["name"] === "string"
       ? (outcome.skill.frontmatter.data["name"] as string)
       : undefined;
-  const hasError = outcome.kind === "skill" && outcome.findings.some((f) => f.severity === "error");
+  const hasError = outcome.kind !== "skill" || outcome.findings.some((f) => f.severity === "error");
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-neutral-950 text-neutral-100">

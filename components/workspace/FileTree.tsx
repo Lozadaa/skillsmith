@@ -49,7 +49,7 @@ export function FileTree({
                   type="button"
                   aria-label={`Delete ${f.path}`}
                   onClick={() => onDelete(f.path)}
-                  className="ml-1 px-1 text-neutral-600 opacity-0 hover:text-red-400 group-hover:opacity-100"
+                  className="ml-1 px-1 text-neutral-600 opacity-0 hover:text-red-400 focus:opacity-100 group-hover:opacity-100"
                 >
                   ×
                 </button>

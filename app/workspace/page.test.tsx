@@ -31,4 +31,14 @@ describe("WorkspacePage paste flow", () => {
     // Demo is valid → no error findings → export enabled.
     expect((screen.getByRole("button", { name: "Download .zip" }) as HTMLButtonElement).disabled).toBe(false);
   });
+
+  it("disables Download .zip when the pasted content is not a skill", () => {
+    render(<WorkspacePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Open…" }));
+    const paste = screen.getByLabelText("Paste a SKILL.md");
+    fireEvent.change(paste, { target: { value: "# just markdown" } });
+    fireEvent.click(screen.getByRole("button", { name: "Analyze" }));
+    // No frontmatter → not-a-skill → export must stay gated even though there are no "skill" findings.
+    expect((screen.getByRole("button", { name: "Download .zip" }) as HTMLButtonElement).disabled).toBe(true);
+  });
 });

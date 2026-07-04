@@ -35,4 +35,10 @@ describe("FileTree", () => {
     fireEvent.click(screen.getByLabelText("Delete references/api.md"));
     expect(onDelete).toHaveBeenCalledWith("references/api.md");
   });
+
+  it("reveals the delete button on keyboard focus, not just hover", () => {
+    render(<FileTree files={files} activePath="SKILL.md" onSelect={() => {}} onAdd={() => {}} onDelete={() => {}} />);
+    const del = screen.getByLabelText("Delete references/api.md");
+    expect(del.className).toContain("focus:opacity-100");
+  });
 });
