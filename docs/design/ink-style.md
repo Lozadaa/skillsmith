@@ -39,6 +39,11 @@ Smiths stamp their proof mark on finished work; Skillsmith stamps the score on y
 - SiteHeader: paper strip with 2px ink bottom border; wordmark "Skillsmith" in IM Fell English; nav links underline on hover with a hand-stroke (2px ink, slightly rotated).
 - Panels (workspace/import/wizard): existing layout structure unchanged — restyle surfaces only.
 
+## Implementation constraint (user-mandated)
+**Styling-only pass.** Do NOT redefine, restructure, or rebuild components: same component files, same props/interfaces, same JSX structure and behavior. The restyle changes className/Tailwind values, global CSS tokens, and fonts ONLY. The design discipline applies chiefly to **spacing and margins** (consistent rhythm: 4px base scale, generous paper gutters) plus the token/linework skin above. Exceptions allowed: the landing hero content (illustration + copy, already user-approved) and purely visual markup inside ScoreBadge (the stamp look). Everything else keeps its DOM.
+
+**New components (user-mandated):** when a genuinely new component is needed (any plan), derive it from an existing one in this codebase — copy the closest existing component's structure, prop conventions, test patterns and styling approach, then adapt. Never invent a novel pattern when a sibling component already solves the shape.
+
 ## Copy voice
 Workshop vernacular, sparing: "Forge" (create), "Inspect" (lint), "Temper" (fix), "Ship" (export). Errors are plain and directive, never cute.
 
