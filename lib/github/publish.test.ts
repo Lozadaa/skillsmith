@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { publishSkill } from "./publish";
 import { GitHubError, type GitHubClient } from "./client";
 import type { SkillFile } from "@/lib/skill-lint";
@@ -46,20 +46,51 @@ describe("publishSkill — new repo", () => {
     expect(res).toEqual({ htmlUrl: "https://github.com/octo/demo", commitSha: "newcommit", skipped: [] });
   });
 
-  it("retries getRef while auto_init's first commit lags, then succeeds", async () => {
-    const getRef = vi
-      .fn()
-      .mockRejectedValueOnce(new GitHubError(409, "Git Repository is empty."))
-      .mockResolvedValueOnce({ sha: "headsha" });
-    const client = stubClient({ getRef });
-    const res = await publishSkill(client, {
-      target: { mode: "new-repo", name: "demo", isPrivate: true, description: "d" },
-      files: FILES,
-      dirName: "demo",
-      message: "Add demo skill",
+  describe("getRef retry (fake timers)", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
     });
-    expect(getRef).toHaveBeenCalledTimes(2);
-    expect(res.commitSha).toBe("newcommit");
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("retries getRef while auto_init's first commit lags, then succeeds", async () => {
+      const getRef = vi
+        .fn()
+        .mockRejectedValueOnce(new GitHubError(409, "Git Repository is empty."))
+        .mockResolvedValueOnce({ sha: "headsha" });
+      const client = stubClient({ getRef });
+      const resPromise = publishSkill(client, {
+        target: { mode: "new-repo", name: "demo", isPrivate: true, description: "d" },
+        files: FILES,
+        dirName: "demo",
+        message: "Add demo skill",
+      });
+      await vi.advanceTimersByTimeAsync(800);
+      const res = await resPromise;
+      expect(getRef).toHaveBeenCalledTimes(2);
+      expect(res.commitSha).toBe("newcommit");
+    });
+
+    it("rejects with the underlying error after exhausting all retries", async () => {
+      const err = new GitHubError(409, "Git Repository is empty.");
+      const getRef = vi.fn().mockRejectedValue(err);
+      const client = stubClient({ getRef });
+      const resPromise = publishSkill(client, {
+        target: { mode: "new-repo", name: "demo", isPrivate: true, description: "d" },
+        files: FILES,
+        dirName: "demo",
+        message: "Add demo skill",
+      });
+      // Swallow the eventual rejection until we assert on it below, so Vitest
+      // doesn't see it as an unhandled rejection while timers advance.
+      const assertion = expect(resPromise).rejects.toBe(err);
+      await vi.advanceTimersByTimeAsync(800);
+      await vi.advanceTimersByTimeAsync(800);
+      await assertion;
+      expect(getRef).toHaveBeenCalledTimes(3);
+    });
   });
 });
 
