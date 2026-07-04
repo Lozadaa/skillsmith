@@ -14,6 +14,8 @@
   --color-ember-deep: #b93e05;
   --color-severity-error: #c92a2a;
   --color-severity-warning: #b7791f;
+  /* Editor's blue pencil — the classic editorial marking ink for suggestions. */
+  --color-severity-suggestion: #2b6cb0;
 
   --font-display: var(--font-im-fell), "Iowan Old Style", Georgia, serif;
   --font-body: var(--font-alegreya-sans), ui-sans-serif, system-ui, sans-serif;
@@ -24,12 +26,35 @@
 }
 
 @layer base {
+  :root {
+    /* Native form controls and scrollbars follow the OS scheme. */
+    color-scheme: light dark;
+  }
   html {
     font-family: var(--font-body);
   }
   body {
     background-color: var(--color-paper);
     color: var(--color-ink);
+  }
+  /* Every interactive element reads as clickable (Tailwind 4 preflight
+     leaves buttons cursor:default); disabled reads as blocked. */
+  button:not(:disabled):not([aria-disabled="true"]),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary,
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  label:has(> input[type="checkbox"]:not(:disabled)),
+  label:has(> input[type="radio"]:not(:disabled)) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled="true"],
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
   }
   ::selection {
     background-color: var(--color-ember);
@@ -122,6 +147,13 @@
     transform: rotate(-0.3deg);
   }
 
+  /* Hero illustration: black ink on white paper. In light mode, multiply
+     blends its white background into the page paper; at night the drawing
+     inverts to chalk lines and screens onto the soot. */
+  .ink-hero-img {
+    mix-blend-mode: multiply;
+  }
+
   /* Hand-stroke underline that draws in on hover, slightly rotated. */
   .ink-underline {
     position: relative;
@@ -140,6 +172,31 @@
   }
   .ink-underline:hover::after {
     transform: rotate(-0.4deg) scaleX(1);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Night forge — dark scheme follows the OS (prefers-color-scheme).
+   Utilities compile to var(--color-*), so overriding the custom properties
+   re-inks every surface: soot paper, chalk linework, ember stays hot.
+   "Deep" accents go BRIGHTER on soot to keep AA contrast for small text.
+--------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #161310;
+    --color-ink: #eae4d8;
+    --color-ink-soft: #a39a8b;
+    --color-ember: #e8590c;
+    --color-ember-deep: #ff8a4a;
+    --color-severity-error: #e5484d;
+    --color-severity-warning: #d9a03f;
+    --color-severity-suggestion: #6ca9e0;
+  }
+  /* The drawing becomes chalk: invert the black-on-white PNG and screen it
+     onto the soot so the linework glows instead of glaring. */
+  .ink-hero-img {
+    filter: invert(1);
+    mix-blend-mode: screen;
   }
 }
 

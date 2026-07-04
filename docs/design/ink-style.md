@@ -14,7 +14,23 @@
 | `--ember-deep` | `#B93E05` | Pressed/hover-deep |
 | Severity inks | error `#C92A2A`, warning `#B7791F`, suggestion = `--ink-soft` | Findings only (stamped-ink semantics) |
 
-No dark mode: paper IS the brand (deliberate).
+### Night forge (dark — follows the OS via prefers-color-scheme, no toggle)
+The drawing inverts: soot paper, chalk linework, ember stays hot (it glows better at night). "Deep" accents go BRIGHTER on soot for AA contrast. The hero PNG inverts + screens so black ink becomes glowing chalk.
+
+| Token | Dark hex |
+|---|---|
+| `--paper` | `#161310` (warm soot) |
+| `--ink` | `#EAE4D8` (bone/chalk) |
+| `--ink-soft` | `#A39A8B` |
+| `--ember` | `#E8590C` (unchanged) |
+| `--ember-deep` | `#FF8A4A` (brighter for AA on soot) |
+| error / warning / suggestion | `#E5484D` / `#D9A03F` / `#6CA9E0` |
+
+### Suggestion ink (third stamped ink)
+Suggestions use the **editor's blue pencil**: `--color-severity-suggestion: #2B6CB0` (light) / `#6CA9E0` (dark) — chips/dots/accents only, so suggestion findings visibly stand out from soft-ink body text.
+
+### Cursor rule
+ALL interactive elements get `cursor: pointer` via a base-layer rule (buttons, role=button, selects, summary, radio/checkbox + their labels); disabled elements get `cursor: not-allowed`. Tailwind 4 preflight leaves buttons `cursor: default` — the base rule restores affordance globally.
 
 ### Type (all via next/font/google, self-hosted at build)
 | Role | Face | Notes |

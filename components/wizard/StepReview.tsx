@@ -11,7 +11,7 @@ import { zipSkill, downloadBlob } from "@/lib/zip";
 const SEVERITY_COLOR: Record<string, string> = {
   error: "text-severity-error",
   warning: "text-severity-warning",
-  suggestion: "text-ink-soft",
+  suggestion: "text-severity-suggestion",
 };
 
 export function StepReview({ state }: { state: WizardState }) {

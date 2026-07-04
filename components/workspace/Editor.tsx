@@ -7,7 +7,12 @@ import { highlightSkillMd, type TokenKind } from "@/lib/highlight";
 /** Shared font/size/line-height/padding/whitespace so the overlay and the
  *  textarea line up character-for-character. Keep these two class lists
  *  identical (aside from color/interaction utilities) or the overlay drifts. */
-const EDITOR_METRICS = "w-full flex-1 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap break-words";
+/** [scrollbar-gutter:stable] reserves the same scrollbar gutter on BOTH
+ *  layers, so the overlay <pre> (no visible scrollbar) and the textarea
+ *  (scrollbar when overflowing) always wrap lines at the identical width —
+ *  without it, wrapped lines drift and the highlight turns to garble. */
+const EDITOR_METRICS =
+  "w-full flex-1 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap break-words [scrollbar-gutter:stable]";
 
 const TOKEN_CLASS: Record<TokenKind, string> = {
   "fm-delim": "text-ink-soft",

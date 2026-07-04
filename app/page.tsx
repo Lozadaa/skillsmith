@@ -90,7 +90,7 @@ export default function Home() {
           width={560}
           height={700}
           loading="eager"
-          className="w-full max-w-md justify-self-center md:justify-self-end"
+          className="ink-hero-img w-full max-w-md justify-self-center md:justify-self-end"
         />
       </section>
 

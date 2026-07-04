@@ -5,7 +5,11 @@ import type { Finding, Severity } from "@/lib/skill-lint";
 const SEVERITY_META: Record<Severity, { label: string; dot: string; badge: string }> = {
   error: { label: "Errors", dot: "bg-severity-error", badge: "border-severity-error text-severity-error" },
   warning: { label: "Warnings", dot: "bg-severity-warning", badge: "border-severity-warning text-severity-warning" },
-  suggestion: { label: "Suggestions", dot: "bg-ink-soft", badge: "border-ink-soft text-ink-soft" },
+  suggestion: {
+    label: "Suggestions",
+    dot: "bg-severity-suggestion",
+    badge: "border-severity-suggestion text-severity-suggestion",
+  },
 };
 
 const ORDER: Severity[] = ["error", "warning", "suggestion"];
