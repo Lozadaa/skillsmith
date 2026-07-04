@@ -133,10 +133,12 @@
   /* Proof-mark stamp: double ink ring around the score. Color set by
      the caller via `currentColor` (band-driven text color). */
   .ink-stamp {
-    border: 2px solid currentColor;
+    border: 2.5px solid currentColor;
+    /* Inked-pad wash behind the number so the stamp reads as pressed ink. */
+    background: color-mix(in srgb, currentColor 10%, transparent);
     box-shadow:
-      0 0 0 2px var(--color-paper),
-      0 0 0 4px currentColor;
+      0 0 0 3px var(--color-paper),
+      0 0 0 5px currentColor;
     border-radius: 255px 20px 225px 20px / 20px 225px 20px 255px;
   }
 
