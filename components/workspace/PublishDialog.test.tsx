@@ -89,4 +89,50 @@ describe("PublishDialog", () => {
     fireEvent.click(screen.getByLabelText(/existing repository/i));
     expect(screen.getByText(/files already at this path will be replaced by this commit/i)).toBeTruthy();
   });
+
+  it("autocompletes owner/repo from a datalist populated by the signed-in user's repos, and publishes the picked repo", async () => {
+    localStorage.setItem("skillsmith:gh-pat", "ghp_x");
+    const publishFn = vi.fn(async () => ({ htmlUrl: "https://github.com/octocat/skills", commitSha: "c", skipped: [] }));
+    const createClientFn = vi.fn(
+      () =>
+        ({
+          getUser: async () => ({ login: "octocat" }),
+          listUserRepos: async () => [
+            { owner: "octocat", repo: "skills", isPrivate: false, defaultBranch: "main", description: "" },
+            { owner: "octocat", repo: "notes", isPrivate: true, defaultBranch: "main", description: "" },
+          ],
+        }) as never
+    );
+    render(
+      <PublishDialog open onClose={() => {}} files={FILES} dirName="demo" publishFn={publishFn} createClientFn={createClientFn} />
+    );
+    fireEvent.click(screen.getByLabelText(/existing repository/i));
+
+    await vi.waitFor(() => {
+      const options = Array.from(document.querySelectorAll("#pub-repo-options option")) as HTMLOptionElement[];
+      expect(options.map((o) => o.value)).toEqual(["octocat/skills", "octocat/notes"]);
+    });
+
+    const input = screen.getByLabelText(/owner\/repo/i);
+    fireEvent.change(input, { target: { value: "octocat/skills" } });
+    fireEvent.click(screen.getByRole("button", { name: /^publish$/i }));
+
+    await screen.findByRole("link", { name: /github\.com\/octocat\/skills/i });
+    expect(publishFn.mock.calls[0][1]).toMatchObject({ target: { mode: "existing", owner: "octocat", repo: "skills" } });
+  });
+
+  it("shows a will-create hint with the signed-in login in new-repo mode", async () => {
+    localStorage.setItem("skillsmith:gh-pat", "ghp_x");
+    const createClientFn = vi.fn(
+      () =>
+        ({
+          getUser: async () => ({ login: "octocat" }),
+          listUserRepos: async () => [],
+        }) as never
+    );
+    render(
+      <PublishDialog open onClose={() => {}} files={FILES} dirName="demo" publishFn={vi.fn()} createClientFn={createClientFn} />
+    );
+    expect(await screen.findByText(/will create github\.com\/octocat\/demo/i)).toBeTruthy();
+  });
 });

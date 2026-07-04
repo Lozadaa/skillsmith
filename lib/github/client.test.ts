@@ -284,6 +284,47 @@ describe("write methods: happy paths", () => {
   });
 });
 
+describe("listUserRepos", () => {
+  it("maps /user/repos into UserRepo shape", async () => {
+    const fetchFn = mockFetch({
+      "/user/repos?per_page=100&sort=pushed": {
+        body: [
+          {
+            name: "skills",
+            owner: { login: "octocat" },
+            private: false,
+            default_branch: "main",
+            description: "My Claude Agent Skills",
+          },
+          {
+            name: "secret-stuff",
+            owner: { login: "octocat" },
+            private: true,
+            default_branch: "trunk",
+            description: null,
+          },
+        ],
+      },
+    });
+    const repos = await createClient({ token: "t", fetchFn }).listUserRepos();
+    expect(repos).toEqual([
+      { owner: "octocat", repo: "skills", isPrivate: false, defaultBranch: "main", description: "My Claude Agent Skills" },
+      { owner: "octocat", repo: "secret-stuff", isPrivate: true, defaultBranch: "trunk", description: "" },
+    ]);
+  });
+
+  it("requires a token before any network call", async () => {
+    let called = 0;
+    const fetchFn = (async () => {
+      called++;
+      return new Response("[]", { status: 200 });
+    }) as unknown as typeof fetch;
+    const client = createClient({ fetchFn });
+    await expect(client.listUserRepos()).rejects.toBeInstanceOf(GitHubError);
+    expect(called).toBe(0);
+  });
+});
+
 describe("write methods: error mapping", () => {
   it("maps a 401 to a GitHubError carrying the API message", async () => {
     const fetchFn = mockFetch({ "/user": { status: 401, body: { message: "Bad credentials" } } });

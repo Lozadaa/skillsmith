@@ -42,6 +42,13 @@ export interface GistFile {
   content: string;
   truncated: boolean;
 }
+export interface UserRepo {
+  owner: string;
+  repo: string;
+  isPrivate: boolean;
+  defaultBranch: string;
+  description: string;
+}
 
 export interface GitHubClient {
   getRepoTree(owner: string, repo: string, ref?: string): Promise<RepoTree>;
@@ -49,6 +56,7 @@ export interface GitHubClient {
   getReadme(owner: string, repo: string): Promise<string>;
   getGistFiles(gistId: string): Promise<GistFile[]>;
   getUser(): Promise<{ login: string }>;
+  listUserRepos(): Promise<UserRepo[]>;
   getDefaultBranch(owner: string, repo: string): Promise<{ defaultBranch: string }>;
   createRepo(opts: { name: string; isPrivate: boolean; description?: string }): Promise<{
     owner: string;
@@ -185,6 +193,20 @@ export function createClient(opts: { token?: string; fetchFn?: typeof fetch } = 
     return { login: data.login };
   }
 
+  async function listUserRepos(): Promise<UserRepo[]> {
+    requireToken();
+    const data = await api<
+      { name: string; owner: { login: string }; private: boolean; default_branch: string; description: string | null }[]
+    >(`/user/repos?per_page=100&sort=pushed`);
+    return data.map((r) => ({
+      owner: r.owner.login,
+      repo: r.name,
+      isPrivate: r.private,
+      defaultBranch: r.default_branch,
+      description: r.description ?? "",
+    }));
+  }
+
   async function getDefaultBranch(owner: string, repo: string): Promise<{ defaultBranch: string }> {
     const data = await api<{ default_branch: string }>(`/repos/${owner}/${repo}`);
     return { defaultBranch: data.default_branch };
@@ -273,6 +295,7 @@ export function createClient(opts: { token?: string; fetchFn?: typeof fetch } = 
     getReadme,
     getGistFiles,
     getUser,
+    listUserRepos,
     getDefaultBranch,
     createRepo,
     getRef,

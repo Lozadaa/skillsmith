@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { stashIncomingSkill } from "@/lib/handoff";
-import { createClient, type GitHubClient } from "@/lib/github/client";
+import { createClient, GitHubError, type GitHubClient, type UserRepo } from "@/lib/github/client";
 import { parseGitHubUrl } from "@/lib/github/url";
 import { resolveTarget, type ImportResult, type PickerSkill } from "@/lib/github/importFlow";
 import { fetchSkillFiles } from "@/lib/github/fetchSkill";
@@ -13,6 +13,7 @@ import TokenField from "./TokenField";
 import CollectionAudit from "./CollectionAudit";
 import SkillPicker from "./SkillPicker";
 import LinksList from "./LinksList";
+import UserRepos from "./UserRepos";
 import ErrorPanel from "./ErrorPanel";
 
 const TOKEN_KEY = "skillsmith:gh-pat";
@@ -36,6 +37,9 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
   const [busyDir, setBusyDir] = useState<string | null>(null);
   const [tokenOpen, setTokenOpen] = useState(false);
   const [bulk, setBulk] = useState<{ running: boolean; step: string }>({ running: false, step: "" });
+  const [me, setMe] = useState<{ login: string } | null>(null);
+  const [repos, setRepos] = useState<UserRepo[]>([]);
+  const [repoBusy, setRepoBusy] = useState(false);
 
   // Token lives only in localStorage, read/written in the UI layer.
   useEffect(() => {
@@ -57,6 +61,61 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
 
   function makeClient(): GitHubClient {
     return createClientFn({ token: token || undefined, fetchFn: fetch });
+  }
+
+  // A token unlocks picking from the signed-in user's own repos. A bad or
+  // revoked token must degrade quietly to signed-out — it must never break
+  // the plain URL-paste flow.
+  useEffect(() => {
+    let cancelled = false;
+    if (!token) {
+      setMe(null);
+      setRepos([]);
+      return;
+    }
+    (async () => {
+      try {
+        const client = makeClient();
+        const [user, userRepos] = await Promise.all([client.getUser(), client.listUserRepos()]);
+        if (!cancelled) {
+          setMe(user);
+          setRepos(userRepos);
+        }
+      } catch {
+        if (!cancelled) {
+          setMe(null);
+          setRepos([]);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  function scanUserRepo(ownerRepo: string) {
+    setUrl(ownerRepo);
+    void run(ownerRepo);
+  }
+
+  async function createSkillsRepo() {
+    if (!me) return;
+    setRepoBusy(true);
+    try {
+      const client = makeClient();
+      try {
+        await client.createRepo({ name: "skills", isPrivate: false, description: "My Claude Agent Skills" });
+      } catch (e) {
+        if (!(e instanceof GitHubError) || e.status !== 422) throw e;
+        // Name already exists — fall through and scan the existing repo.
+      }
+      await run(`${me.login}/skills`);
+    } catch (error) {
+      setView({ s: "error", error });
+    } finally {
+      setRepoBusy(false);
+    }
   }
 
   async function run(inputUrl: string) {
@@ -156,6 +215,17 @@ export default function ImportApp({ createClientFn = createClient }: ImportAppPr
         </div>
         <TokenField token={token} onChange={updateToken} open={tokenOpen} onToggle={setTokenOpen} />
       </form>
+
+      {view.s === "idle" && me && (
+        <UserRepos
+          login={me.login}
+          repos={repos}
+          busy={repoBusy}
+          onScan={scanUserRepo}
+          onCreateSkillsRepo={() => void createSkillsRepo()}
+          onSignOut={() => updateToken("")}
+        />
+      )}
 
       <section className="mt-6">
         {view.s === "loading" && (

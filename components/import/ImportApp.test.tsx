@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ImportApp from "./ImportApp";
-import { NotFoundError, RateLimitError, type GitHubClient } from "@/lib/github/client";
+import { GitHubError, NotFoundError, RateLimitError, type GitHubClient, type UserRepo } from "@/lib/github/client";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -237,5 +237,133 @@ describe("ImportApp", () => {
 
     await vi.waitFor(() => expect(downloadBlob).toHaveBeenCalledTimes(1));
     expect(await screen.findByText(/1 skills? downloaded, 1 item\(s\) skipped/i)).toBeTruthy();
+  });
+});
+
+const TOKEN_KEY = "skillsmith:gh-pat";
+
+function signedInClient(overrides: Partial<GitHubClient> = {}): GitHubClient {
+  return { ...mockClient(), getUser: async () => ({ login: "octocat" }), listUserRepos: async () => [], ...overrides };
+}
+
+describe("ImportApp — signed-in panel", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("shows a signed-in panel with the user's repos when a token is present", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const repos: UserRepo[] = [
+      { owner: "octocat", repo: "skills", isPrivate: false, defaultBranch: "main", description: "My Claude Agent Skills" },
+    ];
+    const client = signedInClient({ listUserRepos: async () => repos });
+    render(<ImportApp createClientFn={() => client} />);
+
+    expect(await screen.findByText(/signed in as/i)).toBeTruthy();
+    expect(screen.getByText("octocat")).toBeTruthy();
+    expect(screen.getByText("octocat/skills")).toBeTruthy();
+  });
+
+  it("does not show the signed-in panel with no token", () => {
+    render(<ImportApp createClientFn={() => mockClient()} />);
+    expect(screen.queryByText(/signed in as/i)).toBeNull();
+  });
+
+  it("treats a bad token as signed out and does not break the URL import flow", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_bad");
+    const client = signedInClient({
+      getUser: async () => {
+        throw new GitHubError(401, "Bad credentials");
+      },
+      listUserRepos: async () => {
+        throw new GitHubError(401, "Bad credentials");
+      },
+    });
+    render(<ImportApp createClientFn={() => client} />);
+
+    await vi.waitFor(() => expect(screen.queryByText(/signed in as/i)).toBeNull());
+
+    fireEvent.change(screen.getByLabelText(/repository url/i), { target: { value: "github.com/o/r" } });
+    fireEvent.click(screen.getByRole("button", { name: /^import$/i }));
+    expect(await screen.findByText("alpha")).toBeTruthy();
+  });
+
+  it("clicking a repo row's Scan button runs the resolve flow for that repo", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const repos: UserRepo[] = [
+      { owner: "octocat", repo: "skills", isPrivate: false, defaultBranch: "main", description: "" },
+    ];
+    const client = signedInClient({ listUserRepos: async () => repos });
+    render(<ImportApp createClientFn={() => client} />);
+
+    const scanBtn = await screen.findByRole("button", { name: /^scan$/i });
+    fireEvent.click(scanBtn);
+    expect(await screen.findByText("alpha")).toBeTruthy();
+  });
+
+  it("Create skills repo creates the repo, then scans it", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const createRepo = vi.fn(async () => ({
+      owner: "octocat",
+      repo: "skills",
+      defaultBranch: "main",
+      htmlUrl: "https://github.com/octocat/skills",
+    }));
+    const client = signedInClient({ createRepo });
+    render(<ImportApp createClientFn={() => client} />);
+
+    const createBtn = await screen.findByRole("button", { name: /create skills repo/i });
+    fireEvent.click(createBtn);
+
+    await vi.waitFor(() =>
+      expect(createRepo).toHaveBeenCalledWith({ name: "skills", isPrivate: false, description: "My Claude Agent Skills" })
+    );
+    expect(await screen.findByText("alpha")).toBeTruthy();
+  });
+
+  it("falls back to scanning the existing repo on a 422 name-exists error", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const createRepo = vi.fn(async () => {
+      throw new GitHubError(422, "name already exists on this account");
+    });
+    const client = signedInClient({ createRepo });
+    render(<ImportApp createClientFn={() => client} />);
+
+    const createBtn = await screen.findByRole("button", { name: /create skills repo/i });
+    fireEvent.click(createBtn);
+
+    expect(await screen.findByText("alpha")).toBeTruthy();
+  });
+
+  it("Sign out clears the token and hides the signed-in panel", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const client = signedInClient();
+    render(<ImportApp createClientFn={() => client} />);
+
+    await screen.findByText(/signed in as/i);
+    fireEvent.click(screen.getByRole("button", { name: /sign out/i }));
+
+    await vi.waitFor(() => expect(screen.queryByText(/signed in as/i)).toBeNull());
+    expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
+  });
+
+  it("shows a filter input and narrows rows once there are more than 8 repos", async () => {
+    localStorage.setItem(TOKEN_KEY, "ghp_x");
+    const repos: UserRepo[] = Array.from({ length: 9 }, (_, i) => ({
+      owner: "octocat",
+      repo: `repo-${i}`,
+      isPrivate: false,
+      defaultBranch: "main",
+      description: "",
+    }));
+    const client = signedInClient({ listUserRepos: async () => repos });
+    render(<ImportApp createClientFn={() => client} />);
+
+    await screen.findByText("octocat/repo-0");
+    const filter = screen.getByLabelText(/filter repos/i);
+    fireEvent.change(filter, { target: { value: "repo-3" } });
+
+    expect(screen.getByText("octocat/repo-3")).toBeTruthy();
+    expect(screen.queryByText("octocat/repo-0")).toBeNull();
   });
 });

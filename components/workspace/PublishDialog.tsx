@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { SkillFile } from "@/lib/skill-lint";
-import { createClient, GitHubError, NotFoundError, RateLimitError } from "@/lib/github/client";
+import { createClient, GitHubError, NotFoundError, RateLimitError, type UserRepo } from "@/lib/github/client";
 import { parseGitHubUrl } from "@/lib/github/url";
 import { publishSkill, type PublishTarget } from "@/lib/github/publish";
 
@@ -48,6 +48,8 @@ export function PublishDialog({
   const [pathPrefix, setPathPrefix] = useState(`skills/${dirName}`);
   const [message, setMessage] = useState(`Add ${dirName} skill`);
   const [state, setState] = useState<State>({ s: "idle" });
+  const [me, setMe] = useState<{ login: string } | null>(null);
+  const [repos, setRepos] = useState<UserRepo[]>([]);
 
   // Token lives only in localStorage, read/written in the UI layer.
   useEffect(() => {
@@ -57,6 +59,37 @@ export function PublishDialog({
       /* storage blocked — in-memory only */
     }
   }, []);
+
+  // If a signed-in token is already stored, quietly fetch the user's repos so
+  // the existing-repo field can autocomplete. A bad/revoked token just means
+  // no autocomplete — never surface an error for this.
+  useEffect(() => {
+    let cancelled = false;
+    if (!token.trim()) {
+      setMe(null);
+      setRepos([]);
+      return;
+    }
+    (async () => {
+      try {
+        const client = createClientFn({ token: token.trim(), fetchFn: fetch });
+        const [user, userRepos] = await Promise.all([client.getUser(), client.listUserRepos()]);
+        if (!cancelled) {
+          setMe(user);
+          setRepos(userRepos);
+        }
+      } catch {
+        if (!cancelled) {
+          setMe(null);
+          setRepos([]);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   function updateToken(t: string) {
     setToken(t);
@@ -167,17 +200,33 @@ export function PublishDialog({
               <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
               Private repository
             </label>
+            {me && (
+              <p className="text-xs text-ink-soft">
+                Will create github.com/{me.login}/{repoName.trim() || "…"}
+              </p>
+            )}
           </div>
         ) : (
           <div className="mt-3 flex flex-col gap-2">
-            <label htmlFor="pub-repo" className="text-sm text-ink-soft">owner/repo</label>
+            <label htmlFor="pub-repo" className="text-sm text-ink-soft">
+              owner/repo{repos.length > 0 && " (autocompletes from your repos when signed in)"}
+            </label>
             <input
               id="pub-repo"
+              list="pub-repo-options"
               value={ownerRepo}
               onChange={(e) => setOwnerRepo(e.target.value)}
-              placeholder="me/my-monorepo"
+              placeholder="owner/repo"
+              autoComplete="off"
               className="rounded border-2 border-ink bg-paper px-2 py-1 text-sm text-ink"
             />
+            {repos.length > 0 && (
+              <datalist id="pub-repo-options">
+                {repos.map((r) => (
+                  <option key={`${r.owner}/${r.repo}`} value={`${r.owner}/${r.repo}`} />
+                ))}
+              </datalist>
+            )}
             <label htmlFor="pub-branch" className="text-sm text-ink-soft">Branch (optional — defaults to the repo default)</label>
             <input
               id="pub-branch"
