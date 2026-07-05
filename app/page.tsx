@@ -70,6 +70,9 @@ export default function Home() {
   const { t } = useLocale();
   return (
     <main className="mx-auto max-w-5xl px-6 py-16">
+      {/* The hero sprite is a CSS background, so the browser discovers it late.
+          Preload it (React 19 hoists this into <head>) to speed up LCP. */}
+      <link rel="preload" as="image" href="/blacksmith-frames.png" fetchPriority="high" />
       <section className="grid items-center gap-10 md:grid-cols-[1fr_45%]">
         <div>
           <h1 className="font-display text-5xl leading-tight text-ink sm:text-6xl">

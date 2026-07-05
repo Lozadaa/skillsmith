@@ -27,7 +27,7 @@ export function SiteHeader() {
       <button
         type="button"
         onClick={() => setLocale(other)}
-        aria-label={t("header.toggleAria")}
+        aria-label={t("header.toggleAria", { code: other.toUpperCase() })}
         className="ink-underline ml-auto text-ink-soft hover:text-ember-deep"
       >
         {other.toUpperCase()}

@@ -14,7 +14,7 @@ description: Use when the user wants a starting point for authoring a Claude Age
 
 # My First Skill
 
-Replace this body with instructions for the agent. Keep it short — move long
+Replace this body with instructions for the agent. Keep it short. Move long
 reference material into a \`references/\` file so it costs zero tokens until read.
 
 ## When to use

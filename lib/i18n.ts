@@ -9,6 +9,9 @@
  *  - lib/wizard/name.ts validateName() messages (mirror the English engine rules E02/E03 verbatim)
  *  - CATEGORIES / LICENSES option lists in StepContent (written verbatim into generated SKILL.md metadata)
  *  - server.mjs (no UI strings)
+ *
+ * COPY STYLE: user-facing strings avoid the em dash. Split ideas into short
+ * sentences, use a colon for a label/explanation pair, or a comma for an aside.
  */
 
 export type Locale = "en" | "es";
@@ -22,15 +25,15 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "header.nav.create": "Create",
     "header.nav.workspace": "Workspace",
     "header.nav.import": "Import",
-    "header.toggleAria": "Switch language",
+    "header.toggleAria": "Switch language to {code}",
 
     // Home / landing
     "home.hero.title": "Forge better skills.",
     "home.hero.subtitle":
-      "Skillsmith is the smith's bench for Claude Agent Skills — inspect, temper and ship a spec-clean SKILL.md, entirely in your browser.",
+      "Skillsmith is the smith's bench for Claude Agent Skills. Inspect, temper and ship a spec-clean SKILL.md, entirely in your browser.",
     "home.hero.cta.workspace": "Open the workshop",
     "home.hero.cta.new": "Start forging",
-    "home.hero.imgAlt": "A blacksmith hammering hot metal on an anvil — hand-drawn ink animation.",
+    "home.hero.imgAlt": "A blacksmith hammering hot metal on an anvil, hand-drawn ink animation.",
     "home.card.inspect.title": "Inspect",
     "home.card.inspect.body":
       "Paste, upload or drop a SKILL.md and get instant findings, a proof-mark score and a token breakdown.",
@@ -50,7 +53,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "import.form.submit": "Import",
     "import.loading.resolving": "Resolving…",
     "import.error.notGithub": "That doesn't look like a GitHub repo, gist, or owner/repo.",
-    "import.gist.label": "Gist skill {dirName} — score {score}.",
+    "import.gist.label": "Gist skill {dirName}: score {score}.",
     "import.picker.truncated":
       "This repository is very large; GitHub truncated the file tree, so these results are partial. Import a subfolder URL (…/tree/main/path) for complete results.",
     "import.picker.found.singular": "Found {count} skill.",
@@ -58,13 +61,13 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "import.picker.downloadAll": "Download all (.zip)",
     "import.picker.downloading": "Downloading…",
     "import.picker.preparing": "Preparing…",
-    "import.picker.doneSummary": "Done — {count} skills downloaded, {skipped} item(s) skipped.",
+    "import.picker.doneSummary": "Done. Downloaded {count} skills, skipped {skipped} item(s).",
 
     // Import — TokenField
     "tokenField.hide": "Hide",
     "tokenField.toggleLabel": "GitHub token (optional)",
     "tokenField.signIn": "Sign in with GitHub",
-    "tokenField.orPaste": "Or paste a personal access token — raises the rate limit and unlocks private repos.",
+    "tokenField.orPaste": "Or paste a personal access token to raise the rate limit and unlock private repos.",
     "tokenField.placeholder": "ghp_…",
     "tokenField.storageNote": "Stored locally only, in this browser (localStorage). Never sent anywhere but github.com.",
 
@@ -75,12 +78,12 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "userRepos.createRepo": "Create skills repo",
     "userRepos.searchPlaceholder": "Search your repos…",
     "userRepos.searchAriaLabel": "Search your repos",
-    "userRepos.countLabel": "{count} repos — type to search.",
+    "userRepos.countLabel": "{count} repos. Type to search.",
     "userRepos.noMatch": "No repos match.",
     "userRepos.private": "private",
     "userRepos.scan": "Scan",
-    "userRepos.overflow.singular": "{overflow} more match — refine your search.",
-    "userRepos.overflow.plural": "{overflow} more matches — refine your search.",
+    "userRepos.overflow.singular": "{overflow} more match. Refine your search.",
+    "userRepos.overflow.plural": "{overflow} more matches. Refine your search.",
 
     // Import — ErrorPanel
     "errorPanel.rateLimit.title": "GitHub rate limit reached",
@@ -93,7 +96,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
 
     // Import — LinksList
     "linksList.none": "No skills and no linked GitHub repos were found in this repository.",
-    "linksList.intro": "No SKILL.md here — but this looks like an awesome-list. Pick a linked repo to scan:",
+    "linksList.intro": "No SKILL.md here, but this looks like an awesome-list. Pick a linked repo to scan:",
 
     // Import — SkillPicker
     "skillPicker.headers.skill": "Skill",
@@ -109,7 +112,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
 
     // Import — CollectionAudit
     "collectionAudit.button": "Audit whole collection ({count} scanned)",
-    "collectionAudit.title": "Collection audit — {count} skills",
+    "collectionAudit.title": "Collection audit: {count} skills",
     "collectionAudit.hide": "Hide",
     "collectionAudit.headers.errors": "Errors",
 
@@ -135,7 +138,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "publishDialog.close": "Close",
     "publishDialog.tokenLabel": "Personal access token",
     "publishDialog.tokenNote":
-      "Needs a token with repo scope — stored locally only, never sent anywhere but github.com.",
+      "Needs a token with repo scope. Stored locally only, never sent anywhere but github.com.",
     "publishDialog.destinationLegend": "Destination",
     "publishDialog.newRepo": "New repository",
     "publishDialog.existingRepo": "Existing repository",
@@ -144,7 +147,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "publishDialog.willCreate": "Will create github.com/{login}/{repo}",
     "publishDialog.ownerRepoLabel": "owner/repo",
     "publishDialog.autocompleteHint": " (autocompletes from your repos when signed in)",
-    "publishDialog.branchLabel": "Branch (optional — defaults to the repo default)",
+    "publishDialog.branchLabel": "Branch (optional, defaults to the repo default)",
     "publishDialog.branchPlaceholder": "main",
     "publishDialog.pathPrefixLabel": "Path prefix",
     "publishDialog.overwriteNote": "Files already at this path will be replaced by this commit.",
@@ -157,8 +160,8 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "publishDialog.error.nameRequired": "Enter a name for the new repository.",
     "publishDialog.error.ownerRepoRequired": "Enter the target as owner/repo or a GitHub repository URL.",
     "publishDialog.error.tokenRequired": "A token with repo scope is required to publish.",
-    "publishDialog.error.rateLimit": "GitHub rate limit reached — wait a moment or use a token with more quota.",
-    "publishDialog.error.notFound": "Repository not found — check the owner/repo and that your token can access it.",
+    "publishDialog.error.rateLimit": "GitHub rate limit reached. Wait a moment, or use a token with more quota.",
+    "publishDialog.error.notFound": "Repository not found. Check the owner/repo and that your token can access it.",
     "publishDialog.error.generic": "Something went wrong while publishing.",
 
     // Workspace — ExportButtons
@@ -185,15 +188,15 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
 
     // Workspace — TokensPanel
     "tokensPanel.estimateNote":
-      "~estimated — Anthropic does not publish the Claude 3+ tokenizer, so these are heuristic counts.",
+      "~estimated. Anthropic does not publish the Claude 3+ tokenizer, so these are heuristic counts.",
     "tokensPanel.metadata.label": "Metadata (name + description)",
-    "tokensPanel.metadata.note": "Loaded into every conversation — the most expensive tokens you own.",
+    "tokensPanel.metadata.note": "Loaded into every conversation: the most expensive tokens you own.",
     "tokensPanel.body.label": "SKILL.md body",
     "tokensPanel.body.note": "Loaded only when the skill triggers.",
     "tokensPanel.references.label": "references/ files",
-    "tokensPanel.references.note": "Zero cost until the agent opens them — moving content here is free.",
+    "tokensPanel.references.note": "Zero cost until the agent opens them. Moving content here is free.",
     "tokensPanel.scripts.label": "scripts/ files",
-    "tokensPanel.scripts.note": "Executed, never loaded — only their output consumes context.",
+    "tokensPanel.scripts.note": "Executed, never loaded. Only their output consumes context.",
     "tokensPanel.unit.tok": "tok",
     "tokensPanel.unit.file": "file",
     "tokensPanel.unit.files": "files",
@@ -214,7 +217,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "scoreBadge.band.good": "Good",
     "scoreBadge.band.needsWork": "Needs work",
     "scoreBadge.band.poor": "Poor",
-    "scoreBadge.title": "Score {value}/100 — {band}",
+    "scoreBadge.title": "Score {value}/100: {band}",
 
     // Workspace — Editor
     "editor.noFile": "No file selected.",
@@ -238,14 +241,14 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     // Wizard — StepIntent
     "wizard.intent.rule.title": "One skill = one capability.",
     "wizard.intent.rule.body":
-      "Good: “Generate release notes from a changelog.” · Bad: “Help with engineering” (too broad — split it into focused skills).",
+      "Good: “Generate release notes from a changelog.” · Bad: “Help with engineering” (too broad; split it into focused skills).",
     "wizard.intent.what.label": "What does this skill enable?",
     "wizard.intent.what.placeholder": "Generate spec-compliant release notes from a changelog.",
     "wizard.intent.when.label": "When should it trigger?",
     "wizard.intent.when.placeholder": "A changelog or list of merged PRs needs to become a readable release note.",
     "wizard.intent.distribution.label": "Personal or shared?",
-    "wizard.intent.distribution.personal": "Personal — just for my own use",
-    "wizard.intent.distribution.shared": "Shared — distribute to a team or the community",
+    "wizard.intent.distribution.personal": "Personal: just for my own use",
+    "wizard.intent.distribution.shared": "Shared: distribute to a team or the community",
 
     // Wizard — StepArchetype
     "wizard.archetype.hint": "Pick the shape that matches the capability. It seeds the section scaffold on the next steps.",
@@ -261,7 +264,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "wizard.content.words": "{count} words",
     "wizard.content.tokens": "~{count} tokens",
     "wizard.content.bodyWarn":
-      "The body is over 400 lines — move detail into references/ so it loads only when needed.",
+      "The body is over 400 lines. Move detail into references/ so it loads only when needed.",
 
     // Wizard — StepDescription / NameField
     "wizard.name.label": "Skill name (kebab-case)",
@@ -277,8 +280,8 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "wizard.description.negative.placeholder": "writing marketing copy or blog posts",
     "wizard.description.assembled": "Assembled description",
     "wizard.description.charCounter": "{count}/1024 chars",
-    "wizard.description.warnLong": "Long descriptions dilute triggering — aim for under 500 characters.",
-    "wizard.description.errorHardLimit": "Over the 1024-character hard limit — the skill will be rejected. Trim it.",
+    "wizard.description.warnLong": "Long descriptions dilute triggering. Aim for under 500 characters.",
+    "wizard.description.errorHardLimit": "Over the 1024-character hard limit. The skill will be rejected, so trim it.",
     "wizard.description.personHint": "Prefer third-person, imperative phrasing over “I can” / “you can”.",
     "wizard.description.agentView": "How the agent sees it",
 
@@ -287,7 +290,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "wizard.review.filesCount": "{count} file(s)",
     "wizard.review.unnamed": "unnamed",
     "wizard.review.findings": "Findings",
-    "wizard.review.noFindings": "No findings — the skill is clean.",
+    "wizard.review.noFindings": "No findings. The skill is clean.",
     "wizard.review.openWorkspace": "Open in Workspace",
     "wizard.review.fixErrors":
       "Fix the {count} error finding(s) to enable download. You can still open the draft in the workspace to iterate.",
@@ -304,15 +307,15 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "header.nav.create": "Crear",
     "header.nav.workspace": "Taller",
     "header.nav.import": "Importar",
-    "header.toggleAria": "Cambiar idioma",
+    "header.toggleAria": "Cambiar idioma a {code}",
 
     // Home / landing
     "home.hero.title": "Forja mejores skills.",
     "home.hero.subtitle":
-      "Skillsmith es el banco de trabajo del herrero para Claude Agent Skills — inspecciona, templa y publica un SKILL.md limpio y conforme a la spec, todo en tu navegador.",
+      "Skillsmith es el banco de trabajo del herrero para Claude Agent Skills. Inspecciona, templa y publica un SKILL.md limpio y conforme a la spec, todo en tu navegador.",
     "home.hero.cta.workspace": "Abrir el taller",
     "home.hero.cta.new": "Empezar a forjar",
-    "home.hero.imgAlt": "Un herrero martillando metal caliente sobre un yunque — animación de tinta dibujada a mano.",
+    "home.hero.imgAlt": "Un herrero martillando metal caliente sobre un yunque, animación de tinta dibujada a mano.",
     "home.card.inspect.title": "Inspecciona",
     "home.card.inspect.body":
       "Pega, sube o arrastra un SKILL.md y obtén hallazgos al instante, una puntuación de marca de garantía y un desglose de tokens.",
@@ -332,7 +335,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "import.form.submit": "Importar",
     "import.loading.resolving": "Resolviendo…",
     "import.error.notGithub": "Eso no parece un repo de GitHub, un gist, ni un owner/repo.",
-    "import.gist.label": "Skill de gist {dirName} — puntuación {score}.",
+    "import.gist.label": "Skill de gist {dirName}: puntuación {score}.",
     "import.picker.truncated":
       "Este repositorio es muy grande; GitHub truncó el árbol de archivos, así que estos resultados son parciales. Importa la URL de una subcarpeta (…/tree/main/path) para resultados completos.",
     "import.picker.found.singular": "Se encontró {count} skill.",
@@ -340,13 +343,13 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "import.picker.downloadAll": "Descargar todo (.zip)",
     "import.picker.downloading": "Descargando…",
     "import.picker.preparing": "Preparando…",
-    "import.picker.doneSummary": "Listo — se descargaron {count} skills, se omitieron {skipped} elemento(s).",
+    "import.picker.doneSummary": "Listo. Se descargaron {count} skills y se omitieron {skipped} elemento(s).",
 
     // Import — TokenField
     "tokenField.hide": "Ocultar",
     "tokenField.toggleLabel": "Token de GitHub (opcional)",
     "tokenField.signIn": "Iniciar sesión con GitHub",
-    "tokenField.orPaste": "O pega un token de acceso personal — eleva el límite de solicitudes y desbloquea repos privados.",
+    "tokenField.orPaste": "O pega un token de acceso personal para elevar el límite de solicitudes y desbloquear repos privados.",
     "tokenField.placeholder": "ghp_…",
     "tokenField.storageNote": "Se guarda solo localmente, en este navegador (localStorage). Nunca se envía a ningún sitio salvo github.com.",
 
@@ -357,12 +360,12 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "userRepos.createRepo": "Crear repo de skills",
     "userRepos.searchPlaceholder": "Busca tus repos…",
     "userRepos.searchAriaLabel": "Buscar tus repos",
-    "userRepos.countLabel": "{count} repos — escribe para buscar.",
+    "userRepos.countLabel": "{count} repos. Escribe para buscar.",
     "userRepos.noMatch": "Ningún repo coincide.",
     "userRepos.private": "privado",
     "userRepos.scan": "Escanear",
-    "userRepos.overflow.singular": "{overflow} coincidencia más — refina tu búsqueda.",
-    "userRepos.overflow.plural": "{overflow} coincidencias más — refina tu búsqueda.",
+    "userRepos.overflow.singular": "{overflow} coincidencia más. Refina tu búsqueda.",
+    "userRepos.overflow.plural": "{overflow} coincidencias más. Refina tu búsqueda.",
 
     // Import — ErrorPanel
     "errorPanel.rateLimit.title": "Límite de solicitudes de GitHub alcanzado",
@@ -375,7 +378,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
 
     // Import — LinksList
     "linksList.none": "No se encontraron skills ni repos de GitHub enlazados en este repositorio.",
-    "linksList.intro": "No hay SKILL.md aquí — pero esto parece una awesome-list. Elige un repo enlazado para escanear:",
+    "linksList.intro": "No hay SKILL.md aquí, pero esto parece una awesome-list. Elige un repo enlazado para escanear:",
 
     // Import — SkillPicker
     "skillPicker.headers.skill": "Skill",
@@ -391,7 +394,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
 
     // Import — CollectionAudit
     "collectionAudit.button": "Auditar toda la colección ({count} escaneados)",
-    "collectionAudit.title": "Auditoría de colección — {count} skills",
+    "collectionAudit.title": "Auditoría de colección: {count} skills",
     "collectionAudit.hide": "Ocultar",
     "collectionAudit.headers.errors": "Errores",
 
@@ -417,7 +420,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "publishDialog.close": "Cerrar",
     "publishDialog.tokenLabel": "Token de acceso personal",
     "publishDialog.tokenNote":
-      "Necesita un token con alcance repo — se guarda solo localmente, nunca se envía a ningún sitio salvo github.com.",
+      "Necesita un token con alcance repo. Se guarda solo localmente, nunca se envía a ningún sitio salvo github.com.",
     "publishDialog.destinationLegend": "Destino",
     "publishDialog.newRepo": "Repositorio nuevo",
     "publishDialog.existingRepo": "Repositorio existente",
@@ -426,7 +429,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "publishDialog.willCreate": "Se creará github.com/{login}/{repo}",
     "publishDialog.ownerRepoLabel": "owner/repo",
     "publishDialog.autocompleteHint": " (autocompleta desde tus repos cuando iniciaste sesión)",
-    "publishDialog.branchLabel": "Rama (opcional — usa la rama por defecto del repo)",
+    "publishDialog.branchLabel": "Rama (opcional, usa la rama por defecto del repo)",
     "publishDialog.branchPlaceholder": "main",
     "publishDialog.pathPrefixLabel": "Prefijo de ruta",
     "publishDialog.overwriteNote": "Los archivos que ya existan en esta ruta serán reemplazados por este commit.",
@@ -439,8 +442,8 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "publishDialog.error.nameRequired": "Ingresa un nombre para el nuevo repositorio.",
     "publishDialog.error.ownerRepoRequired": "Ingresa el destino como owner/repo o una URL de repositorio de GitHub.",
     "publishDialog.error.tokenRequired": "Se requiere un token con alcance repo para publicar.",
-    "publishDialog.error.rateLimit": "Límite de solicitudes de GitHub alcanzado — espera un momento o usa un token con más cuota.",
-    "publishDialog.error.notFound": "Repositorio no encontrado — revisa el owner/repo y que tu token pueda acceder a él.",
+    "publishDialog.error.rateLimit": "Límite de solicitudes de GitHub alcanzado. Espera un momento, o usa un token con más cuota.",
+    "publishDialog.error.notFound": "Repositorio no encontrado. Revisa el owner/repo y que tu token pueda acceder a él.",
     "publishDialog.error.generic": "Algo salió mal al publicar.",
 
     // Workspace — ExportButtons
@@ -467,15 +470,15 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
 
     // Workspace — TokensPanel
     "tokensPanel.estimateNote":
-      "~estimado — Anthropic no publica el tokenizador de Claude 3+, así que estos son conteos heurísticos.",
+      "~estimado. Anthropic no publica el tokenizador de Claude 3+, así que estos son conteos heurísticos.",
     "tokensPanel.metadata.label": "Metadatos (name + description)",
-    "tokensPanel.metadata.note": "Se cargan en cada conversación — los tokens más caros que tienes.",
+    "tokensPanel.metadata.note": "Se cargan en cada conversación: los tokens más caros que tienes.",
     "tokensPanel.body.label": "Cuerpo de SKILL.md",
     "tokensPanel.body.note": "Se carga solo cuando el skill se activa.",
     "tokensPanel.references.label": "archivos de references/",
-    "tokensPanel.references.note": "Costo cero hasta que el agente los abre — mover contenido aquí es gratis.",
+    "tokensPanel.references.note": "Costo cero hasta que el agente los abre. Mover contenido aquí es gratis.",
     "tokensPanel.scripts.label": "archivos de scripts/",
-    "tokensPanel.scripts.note": "Se ejecutan, nunca se cargan — solo su salida consume contexto.",
+    "tokensPanel.scripts.note": "Se ejecutan, nunca se cargan. Solo su salida consume contexto.",
     "tokensPanel.unit.tok": "tok",
     "tokensPanel.unit.file": "archivo",
     "tokensPanel.unit.files": "archivos",
@@ -496,7 +499,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "scoreBadge.band.good": "Bueno",
     "scoreBadge.band.needsWork": "Necesita trabajo",
     "scoreBadge.band.poor": "Deficiente",
-    "scoreBadge.title": "Puntuación {value}/100 — {band}",
+    "scoreBadge.title": "Puntuación {value}/100: {band}",
 
     // Workspace — Editor
     "editor.noFile": "Ningún archivo seleccionado.",
@@ -520,14 +523,14 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     // Wizard — StepIntent
     "wizard.intent.rule.title": "Un skill = una capacidad.",
     "wizard.intent.rule.body":
-      "Bien: “Genera notas de lanzamiento a partir de un changelog.” · Mal: “Ayuda con ingeniería” (demasiado amplio — divídelo en skills enfocados).",
+      "Bien: “Genera notas de lanzamiento a partir de un changelog.” · Mal: “Ayuda con ingeniería” (demasiado amplio; divídelo en skills enfocados).",
     "wizard.intent.what.label": "¿Qué habilita este skill?",
     "wizard.intent.what.placeholder": "Genera notas de lanzamiento conformes a la spec a partir de un changelog.",
     "wizard.intent.when.label": "¿Cuándo debería activarse?",
     "wizard.intent.when.placeholder": "Un changelog o una lista de PRs fusionados necesita convertirse en una nota de lanzamiento legible.",
     "wizard.intent.distribution.label": "¿Personal o compartido?",
-    "wizard.intent.distribution.personal": "Personal — solo para mi propio uso",
-    "wizard.intent.distribution.shared": "Compartido — distribuir a un equipo o la comunidad",
+    "wizard.intent.distribution.personal": "Personal: solo para mi propio uso",
+    "wizard.intent.distribution.shared": "Compartido: distribuir a un equipo o la comunidad",
 
     // Wizard — StepArchetype
     "wizard.archetype.hint": "Elige la forma que coincida con la capacidad. Esto siembra el andamiaje de secciones en los siguientes pasos.",
@@ -543,7 +546,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "wizard.content.words": "{count} palabras",
     "wizard.content.tokens": "~{count} tokens",
     "wizard.content.bodyWarn":
-      "El cuerpo supera las 400 líneas — mueve el detalle a references/ para que se cargue solo cuando se necesite.",
+      "El cuerpo supera las 400 líneas. Mueve el detalle a references/ para que se cargue solo cuando se necesite.",
 
     // Wizard — StepDescription / NameField
     "wizard.name.label": "Nombre del skill (kebab-case)",
@@ -559,8 +562,8 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "wizard.description.negative.placeholder": "escribir copy de marketing o entradas de blog",
     "wizard.description.assembled": "Descripción ensamblada",
     "wizard.description.charCounter": "{count}/1024 caracteres",
-    "wizard.description.warnLong": "Las descripciones largas diluyen la activación — apunta a menos de 500 caracteres.",
-    "wizard.description.errorHardLimit": "Supera el límite estricto de 1024 caracteres — el skill será rechazado. Recórtala.",
+    "wizard.description.warnLong": "Las descripciones largas diluyen la activación. Apunta a menos de 500 caracteres.",
+    "wizard.description.errorHardLimit": "Supera el límite estricto de 1024 caracteres. El skill será rechazado, así que recórtala.",
     "wizard.description.personHint": "Prefiere una redacción en tercera persona e imperativa en lugar de “I can” / “you can”.",
     "wizard.description.agentView": "Cómo lo ve el agente",
 
@@ -569,7 +572,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "wizard.review.filesCount": "{count} archivo(s)",
     "wizard.review.unnamed": "sin nombre",
     "wizard.review.findings": "Hallazgos",
-    "wizard.review.noFindings": "Sin hallazgos — el skill está limpio.",
+    "wizard.review.noFindings": "Sin hallazgos. El skill está limpio.",
     "wizard.review.openWorkspace": "Abrir en el Taller",
     "wizard.review.fixErrors":
       "Corrige los {count} hallazgo(s) de error para habilitar la descarga. Aún puedes abrir el borrador en el taller para iterar.",

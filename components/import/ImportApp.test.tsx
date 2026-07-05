@@ -236,7 +236,7 @@ describe("ImportApp", () => {
     fireEvent.click(dl);
 
     await vi.waitFor(() => expect(downloadBlob).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText(/1 skills? downloaded, 1 item\(s\) skipped/i)).toBeTruthy();
+    expect(await screen.findByText(/downloaded 1 skills?, skipped 1 item\(s\)/i)).toBeTruthy();
   });
 });
 

@@ -55,7 +55,7 @@ describe("t() interpolation", () => {
   });
 
   it("substitutes multiple distinct tokens", () => {
-    expect(t("en", "scoreBadge.title", { value: 92, band: "Excellent" })).toBe("Score 92/100 — Excellent");
+    expect(t("en", "scoreBadge.title", { value: 92, band: "Excellent" })).toBe("Score 92/100: Excellent");
   });
 
   it("returns the raw string unchanged when there are no tokens to fill", () => {

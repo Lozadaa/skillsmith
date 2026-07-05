@@ -42,7 +42,7 @@ export function StepReview({ state }: { state: WizardState }) {
         <div>
           <p className="text-sm text-ink-soft">{t("wizard.review.lintScore")}</p>
           <p className="font-display text-3xl text-ink">
-            {score ? `${score.value}/100` : "—"}
+            {score ? `${score.value}/100` : "-"}
             {score && <span className="ml-2 text-sm font-normal text-ink-soft">{score.band}</span>}
           </p>
         </div>

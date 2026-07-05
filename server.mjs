@@ -33,6 +33,18 @@ function parseCookies(header = "") {
   );
 }
 
+/**
+ * Cache-Control by asset class. Next's /_next/static/ files are content-hashed,
+ * so they're immutable and safe to cache forever. HTML must revalidate so a new
+ * deploy is picked up immediately. Everything else (root images, icons, fonts)
+ * is not hashed, so cache it briefly.
+ */
+function cacheControl(urlPath, ext) {
+  if (urlPath.startsWith("/_next/static/")) return "public, max-age=31536000, immutable";
+  if (ext === ".html" || ext === "") return "no-cache";
+  return "public, max-age=86400";
+}
+
 /** Resolve a URL path to a file inside out/ (flat export: /workspace -> workspace.html). */
 async function serveStatic(res, urlPath) {
   let p = decodeURIComponent(urlPath.split("?")[0]);
@@ -44,7 +56,11 @@ async function serveStatic(res, urlPath) {
     if (!full.startsWith(OUT_DIR + sep) && full !== OUT_DIR) continue; // traversal guard
     try {
       const data = await readFile(full);
-      res.writeHead(200, { "content-type": MIME[extname(full)] || "application/octet-stream" });
+      const ext = extname(full);
+      res.writeHead(200, {
+        "content-type": MIME[ext] || "application/octet-stream",
+        "cache-control": cacheControl(urlPath, ext),
+      });
       res.end(data);
       return;
     } catch {

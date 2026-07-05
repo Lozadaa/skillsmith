@@ -46,7 +46,7 @@ export default function SkillPicker({
               </td>
               <td className="py-2 pr-4 font-mono text-xs text-ink-soft">{s.ref.dirPath || t("skillPicker.root")}</td>
               <td className="py-2 pr-4 font-display text-ink" data-testid={`mini-score-${s.ref.dirPath || s.ref.name}`}>
-                {s.scanned && s.lint.ok ? s.lint.score : "—"}
+                {s.scanned && s.lint.ok ? s.lint.score : "-"}
               </td>
               <td className="py-2 pr-4 text-xs">
                 {s.scanned && s.lint.ok ? (
