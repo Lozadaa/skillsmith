@@ -80,7 +80,7 @@ Navigate with the arrow keys, `⏎` to choose, `Ctrl-C` to cancel.
 |---|---|
 | `--source <global\|local>` | Which `.claude/skills` to scan |
 | `--path <dir>` | Treat `<dir>` as the skills root (works even if it *is* a single skill) |
-| `--profile <generic\|claude-code-plugin>` | Lint profile (default: `generic`) |
+| `--profile <claude-code-plugin\|generic>` | Lint profile (default: `claude-code-plugin`) |
 | `--report` | Print a plain report and exit (no prompts) |
 | `--export <json\|md> [path]` | Write a report file and exit |
 | `--no-color` | Disable ANSI color |

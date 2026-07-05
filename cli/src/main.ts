@@ -27,7 +27,7 @@ Usage
 Options
   --source <global|local>     which .claude/skills to scan
   --path <dir>                treat <dir> as the skills root
-  --profile <generic|claude-code-plugin>   lint profile (default: generic)
+  --profile <claude-code-plugin|generic>   lint profile (default: claude-code-plugin)
   --report                    print a plain report and exit (no TUI)
   --export <json|md> [path]   write a report file and exit
   --no-color                  disable ANSI color
@@ -39,8 +39,8 @@ Keys (interactive)
   On the source screen, pick Global/Project or choose "enter a custom path".`;
 
 function parseProfile(): Profile {
-  const p = val("--profile");
-  return p === "claude-code-plugin" ? "claude-code-plugin" : "generic";
+  // Default to the Claude Code plugin profile; --profile generic opts out.
+  return val("--profile") === "generic" ? "generic" : "claude-code-plugin";
 }
 
 function pickSources(): SourceRef[] {
