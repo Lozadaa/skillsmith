@@ -43,6 +43,14 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "home.card.import.title": "Import",
     "home.card.import.body":
       "Paste any GitHub repo URL to detect its skills and load one straight onto the bench.",
+
+    // Home / CLI callout
+    "home.cli.title": "Prefer the terminal?",
+    "home.cli.body":
+      "Skillsmith also runs in your terminal. Scan your global or project skills and temper the findings without leaving your shell, with nothing to install.",
+    "home.cli.cmd": "npx @lozadaa/skillsmith",
+    "home.cli.hint": "Pick a source or a custom path, inspect a skill, then press f to fix or e to export.",
+
     "home.footer": "Static, private, no account. All analysis runs in your browser.",
 
     // Import — ImportApp
@@ -325,6 +333,14 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "home.card.import.title": "Importa",
     "home.card.import.body":
       "Pega la URL de cualquier repo de GitHub para detectar sus skills y cargar uno directo al banco.",
+
+    // Home / CLI callout
+    "home.cli.title": "¿Prefieres la terminal?",
+    "home.cli.body":
+      "Skillsmith también corre en tu terminal. Escanea tus skills globales o del proyecto y templa los hallazgos sin salir de la shell, sin instalar nada.",
+    "home.cli.cmd": "npx @lozadaa/skillsmith",
+    "home.cli.hint": "Elige una fuente o una ruta custom, inspecciona un skill, y pulsa f para corregir o e para exportar.",
+
     "home.footer": "Estático, privado, sin cuenta. Todo el análisis se ejecuta en tu navegador.",
 
     // Import — ImportApp

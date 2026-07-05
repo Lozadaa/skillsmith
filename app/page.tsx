@@ -118,6 +118,21 @@ export default function Home() {
         />
       </section>
 
+      <section className="ink-panel mt-16 p-8">
+        <h2 className="font-display text-2xl text-ink">{t("home.cli.title")}</h2>
+        <p className="mt-3 max-w-2xl text-ink-soft">{t("home.cli.body")}</p>
+        <div
+          className="mt-5 flex items-center gap-3 overflow-x-auto border-2 border-ink bg-ink px-4 py-3 text-sm text-paper"
+          style={{ fontFamily: "var(--font-plex-mono)" }}
+        >
+          <span aria-hidden className="select-none text-ember">
+            $
+          </span>
+          <code>{t("home.cli.cmd")}</code>
+        </div>
+        <p className="mt-3 text-sm text-ink-soft">{t("home.cli.hint")}</p>
+      </section>
+
       <footer className="mt-20 border-t-2 border-ink pt-6 text-center text-sm text-ink-soft">
         {t("home.footer")}
       </footer>

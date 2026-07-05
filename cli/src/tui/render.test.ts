@@ -32,6 +32,7 @@ const base: State = {
   screen: "list",
   cursor: 0,
   findingCursor: 0,
+  input: "",
   cols: 80,
   rows: 24,
 };
