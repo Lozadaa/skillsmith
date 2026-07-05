@@ -52,6 +52,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "home.cli.hint": "Pick a source or a custom path, inspect a skill, then press f to fix or e to export.",
 
     "home.footer": "Static, private, no account. All analysis runs in your browser.",
+    "home.openSource": "Open source on GitHub",
 
     // Import — ImportApp
     "import.title": "Import a skill from GitHub",
@@ -342,6 +343,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     "home.cli.hint": "Elige una fuente o una ruta custom, inspecciona un skill, y pulsa f para corregir o e para exportar.",
 
     "home.footer": "Estático, privado, sin cuenta. Todo el análisis se ejecuta en tu navegador.",
+    "home.openSource": "Código abierto en GitHub",
 
     // Import — ImportApp
     "import.title": "Importa un skill desde GitHub",

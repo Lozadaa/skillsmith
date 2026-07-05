@@ -134,7 +134,17 @@ export default function Home() {
       </section>
 
       <footer className="mt-20 border-t-2 border-ink pt-6 text-center text-sm text-ink-soft">
-        {t("home.footer")}
+        <p>{t("home.footer")}</p>
+        <p className="mt-2">
+          <a
+            href="https://github.com/Lozadaa/skillsmith"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ink-underline hover:text-ember-deep"
+          >
+            {t("home.openSource")}
+          </a>
+        </p>
       </footer>
     </main>
   );
