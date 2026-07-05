@@ -81,22 +81,38 @@ Navigate with the arrow keys, `⏎` to choose, `Ctrl-C` to cancel.
 | `--source <global\|local>` | Which `.claude/skills` to scan |
 | `--path <dir>` | Treat `<dir>` as the skills root (works even if it *is* a single skill) |
 | `--profile <claude-code-plugin\|generic>` | Lint profile (default: `claude-code-plugin`) |
-| `--report` | Print a plain report and exit (no prompts) |
+| `check [path]` | Lint like ESLint: report problems and exit non-zero (see below) |
+| `--report` | Print a plain dashboard report and exit (no prompts) |
 | `--export <json\|md> [path]` | Write a report file and exit |
+| `--format <stylish\|compact\|json>` | `check` output format (default: `stylish`) |
+| `--max-warnings <n>` | `check`: exit non-zero if warnings exceed `n` |
+| `--quiet` | `check`: report errors only |
 | `--no-color` | Disable ANSI color |
 | `-h, --help` · `-v, --version` | Usage / version |
 
-### Built for CI
+### Lint your project (like ESLint)
 
-Piped or non-interactive output automatically falls back to a plain report and **exits `1`
-when any error-severity finding exists** — drop it straight into a pipeline:
+`check` is a non-interactive linter: it scans your project's skills, prints problems grouped
+per skill (line · severity · message · rule), and **exits non-zero on errors** — drop it into
+CI or a pre-commit hook. It defaults to the project's `./.claude/skills` (falls back to global).
 
 ```bash
-npx @lozadaa/skillsmith --report --source local || echo "skills need work"
+npx @lozadaa/skillsmith check                    # lint ./.claude/skills
+npx @lozadaa/skillsmith check --max-warnings 0   # fail on any warning too
+npx @lozadaa/skillsmith check --format json > report.json
 ```
 
-The report renders in color on a real TTY (or with `FORCE_COLOR=1`) and stays plain when
-redirected, so logs are clean.
+```
+ux-writing/SKILL.md
+       error    README.md found inside the skill folder  E11
+   3   warning  description is 811 characters (soft limit 500)  W03
+
+✖ 19 problems (1 error, 10 warnings, 8 suggestions)
+```
+
+**Exit codes:** `0` clean · `1` errors (or warnings over `--max-warnings`) · `2` no skills found.
+Output is colored on a real TTY (or with `FORCE_COLOR=1`) and plain when piped, so CI logs stay
+clean. `--quiet` reports errors only; `--format compact` gives one `path:line: severity` per line.
 
 ---
 
