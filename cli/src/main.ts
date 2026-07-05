@@ -6,7 +6,7 @@ import { analyzeSource, errorCount } from "./analyze";
 import { renderReport } from "./report";
 import { toJson, toMarkdown, writeReport } from "./export";
 import { detectCaps, makeTheme } from "./tui/theme";
-import { runTui } from "./tui/app";
+import { runInteractive } from "./interactive";
 
 const VERSION = "0.1.0";
 
@@ -83,9 +83,8 @@ function main(): void {
     process.exit(errorCount(skills) > 0 ? 1 : 0);
   }
 
-  // Interactive TUI.
-  const theme = makeTheme(detectCaps({ noColor: has("--no-color"), isTTY: true }));
-  runTui(sources, profile, theme).then(() => process.exit(0));
+  // Interactive experience (@clack/prompts).
+  runInteractive(sources, profile).then(() => process.exit(0));
 }
 
 main();

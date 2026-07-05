@@ -1,7 +1,7 @@
 // Wraps the lib/skill-lint engine: reads each skill folder from a source and
 // runs lintSkill against it. Holds the in-memory files so profile toggles and
 // applied fixes can re-lint without touching disk again.
-import { lintSkill, type LintOutcome, type Profile, type SkillFile } from "../../lib/skill-lint";
+import { lintSkill, type Finding, type LintOutcome, type Profile, type SkillFile } from "../../lib/skill-lint";
 import { listSkillDirs, readSkillFiles, type SourceRef } from "./scan";
 
 export interface AnalyzedSkill {
@@ -25,6 +25,16 @@ export function analyzeSource(source: SourceRef, profile: Profile): AnalyzedSkil
 /** Re-lint one skill's current in-memory files under a (possibly new) profile. */
 export function relint(skill: AnalyzedSkill, profile: Profile): AnalyzedSkill {
   return { ...skill, outcome: lint(skill.dirName, skill.files, profile) };
+}
+
+const SEV_ORDER: Record<Finding["severity"], number> = { error: 0, warning: 1, suggestion: 2 };
+
+/** Findings ordered error -> warning -> suggestion, stable within a severity. */
+export function orderedFindings(findings: Finding[]): Finding[] {
+  return findings
+    .map((f, i) => [f, i] as const)
+    .sort((a, b) => SEV_ORDER[a[0].severity] - SEV_ORDER[b[0].severity] || a[1] - b[1])
+    .map(([f]) => f);
 }
 
 /** Count of error-severity findings across a set — drives the report exit code. */

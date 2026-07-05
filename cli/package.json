@@ -30,6 +30,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "esbuild": "^0.24.0"
+    "@clack/prompts": "^1.7.0",
+    "esbuild": "^0.24.0",
+    "picocolors": "^1.1.1"
   }
 }
