@@ -34,12 +34,25 @@ function renderSource(s: State, t: Theme): string {
     const label = i === s.cursor ? t.fg(EMBER, pad(src.label, 32)) : pad(src.label, 32);
     return `${point} ${label} ${t.dim(`${n} skill${n === 1 ? "" : "s"}`)}`;
   });
-  return chrome(
-    t,
-    t.bold(t.fg(EMBER, "skillsmith")) + t.dim("  choose a source"),
-    body,
-    "↑↓ move   ⏎ select   q quit"
-  );
+  // Trailing row: enter a custom path.
+  const customIdx = s.sources.length;
+  const cpoint = s.cursor === customIdx ? t.fg(EMBER, cur) : " ";
+  const clabel = `${t.caps.unicode ? "＋" : "+"} enter a custom path…`;
+  body.push(`${cpoint} ${s.cursor === customIdx ? t.fg(EMBER, clabel) : t.dim(clabel)}`);
+  const title = s.sources.length ? "choose a source" : "no default skills found — add a custom path";
+  return chrome(t, t.bold(t.fg(EMBER, "skillsmith")) + t.dim("  " + title), body, "↑↓ move   ⏎ select   q quit");
+}
+
+function renderInput(s: State, t: Theme): string {
+  const caret = t.caps.unicode ? "▏" : "|";
+  const body = [
+    t.dim("Path to a skill folder, or a folder that contains skills:"),
+    "",
+    `  ${t.fg(EMBER, (s.input || "") + caret)}`,
+    "",
+    t.dim("~ expands to your home directory"),
+  ];
+  return chrome(t, t.fg(EMBER, "custom path"), body, "⏎ scan   esc cancel");
 }
 
 function renderList(s: State, t: Theme): string {
@@ -144,6 +157,7 @@ export function render(s: State, t: Theme): string {
   let screen: string;
   switch (s.screen) {
     case "source": screen = renderSource(s, t); break;
+    case "input": screen = renderInput(s, t); break;
     case "list": screen = renderList(s, t); break;
     case "detail": screen = renderDetail(s, t); break;
     case "confirm": screen = renderConfirm(s, t); break;

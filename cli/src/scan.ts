@@ -47,15 +47,20 @@ const hasSkillMd = (dir: string): boolean => {
   }
 };
 
-/** Immediate subfolders of `root` that contain a SKILL.md, alphabetical. */
+/**
+ * Skills under `root`: the immediate subfolders that contain a SKILL.md, plus
+ * `root` itself when it IS a skill (so a custom path pointed straight at one
+ * skill folder still resolves). Alphabetical.
+ */
 export function listSkillDirs(root: string): SkillDir[] {
+  const dirs: SkillDir[] = [];
+  if (hasSkillMd(root)) dirs.push({ dirName: basename(root), dir: root });
   let entries: string[] = [];
   try {
     entries = readdirSync(root);
   } catch {
-    return [];
+    return dirs;
   }
-  const dirs: SkillDir[] = [];
   for (const name of entries.sort((a, b) => a.localeCompare(b))) {
     const dir = join(root, name);
     let isDir = false;

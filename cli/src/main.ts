@@ -33,7 +33,8 @@ Options
   -v, --version               show version
 
 Keys (interactive)
-  ↑↓/jk move · ⏎ inspect · p profile · f apply fix · e export · esc back · q quit`;
+  ↑↓/jk move · ⏎ inspect · p profile · f apply fix · e export · esc back · q quit
+  On the source screen, pick Global/Project or choose "enter a custom path".`;
 
 function parseProfile(): Profile {
   const p = val("--profile");
@@ -52,15 +53,15 @@ function main(): void {
 
   const profile = parseProfile();
   const sources = pickSources();
-
-  if (sources.length === 0) {
-    console.error("No .claude/skills found (global ~/.claude/skills or ./.claude/skills).");
+  const noSources = () => {
+    console.error("No .claude/skills found. Pass --path <dir> to point at a custom location.");
     process.exit(0);
-  }
+  };
 
   // --export: write a file for the first (or --source-filtered) source and exit.
   const exportIdx = argv.indexOf("--export");
   if (exportIdx >= 0) {
+    if (sources.length === 0) noSources();
     const fmt = argv[exportIdx + 1] === "json" ? "json" : "md";
     const maybePath = argv[exportIdx + 2];
     const path = maybePath && !maybePath.startsWith("-") ? maybePath : `./skillsmith-report.${fmt}`;
@@ -74,6 +75,7 @@ function main(): void {
 
   // Report mode: explicit --report or a non-interactive stdout (pipe/CI).
   if (has("--report") || !process.stdout.isTTY) {
+    if (sources.length === 0) noSources();
     const source = sources[0];
     const skills = analyzeSource(source, profile);
     const theme = makeTheme(detectCaps({ noColor: has("--no-color"), isTTY: process.stdout.isTTY }));

@@ -47,6 +47,14 @@ describe("readSkillFiles", () => {
   });
 });
 
+describe("listSkillDirs — root itself is a skill", () => {
+  it("includes the root when a custom path points straight at one skill folder", () => {
+    write("solo/SKILL.md", "# solo");
+    const dirs = listSkillDirs(join(root, "solo")).map((d) => d.dirName);
+    expect(dirs).toContain("solo");
+  });
+});
+
 describe("resolveSources", () => {
   it("uses --path when the directory exists, and nothing when it doesn't", () => {
     expect(resolveSources(process.cwd(), root)).toEqual([{ id: "path", label: root, root }]);

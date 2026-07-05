@@ -3,7 +3,7 @@ import type { SourceRef } from "../scan";
 import type { AnalyzedSkill } from "../analyze";
 import type { FixPreview } from "../fixes";
 
-export type Screen = "source" | "list" | "detail" | "confirm" | "help";
+export type Screen = "source" | "list" | "detail" | "confirm" | "help" | "input";
 
 export interface State {
   sources: SourceRef[];
@@ -13,6 +13,7 @@ export interface State {
   screen: Screen;
   cursor: number; // index into sources (source screen) or skills (list)
   findingCursor: number; // index into the ordered findings of the open skill
+  input: string; // buffer for the custom-path prompt
   message?: string;
   confirm?: { preview: FixPreview };
   cols: number;
