@@ -1,0 +1,35 @@
+{
+  "name": "@lozadaa/skillsmith",
+  "version": "0.1.0",
+  "description": "Beautiful terminal analyzer for Claude Agent Skills — scan your global or project .claude/skills, score them, and temper the findings.",
+  "type": "module",
+  "bin": {
+    "skillsmith": "dist/skillsmith.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "prepublishOnly": "node build.mjs"
+  },
+  "keywords": [
+    "claude",
+    "agent-skills",
+    "skill",
+    "linter",
+    "cli",
+    "tui"
+  ],
+  "author": "Richard A. Lozada",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
