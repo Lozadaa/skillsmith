@@ -1,9 +1,11 @@
 <div align="center">
 
-# Skillsmith
+# 🔨 Skillsmith
 
 **The smith's bench for Claude Agent Skills.**
 Inspect, temper, and ship spec-clean `SKILL.md` files — in your browser or your terminal.
+
+<img src="https://raw.githubusercontent.com/Lozadaa/skillsmith/main/public/blacksmith.png" alt="Skillsmith blacksmith" width="320" />
 
 [![npm](https://img.shields.io/npm/v/@lozadaa/skillsmith?color=E8590C&label=npx%20%40lozadaa%2Fskillsmith)](https://www.npmjs.com/package/@lozadaa/skillsmith)
 [![license](https://img.shields.io/badge/license-MIT-16130E)](#license)
@@ -18,15 +20,15 @@ best practices: a static linter with **48 rules**, a 0–100 **proof-mark score*
 educational **token breakdown** of every part of a skill. The same engine powers two front
 ends — a private, static **web app** and a beautiful **terminal app**.
 
-- **Inspect** — instant findings (errors, warnings, suggestions), each with *why it matters* and *how to fix it*.
-- **Score** — a single number that tells you how spec-clean a skill is.
-- **Tokens** — see exactly what loads into every conversation vs. only when a skill triggers.
-- **Temper** — apply auto-fixes for the fixable findings.
-- **Private** — analysis runs locally. Nothing is uploaded.
+- 🔍 **Inspect** — instant findings (errors, warnings, suggestions), each with *why it matters* and *how to fix it*.
+- 🏷️ **Score** — a single number that tells you how spec-clean a skill is.
+- 🪙 **Tokens** — see exactly what loads into every conversation vs. only when a skill triggers.
+- ⚒️ **Temper** — apply auto-fixes for the fixable findings.
+- 🔒 **Private** — analysis runs locally. Nothing is uploaded.
 
 ---
 
-## The CLI — `npx @lozadaa/skillsmith`
+## 🖥️ The CLI — `npx @lozadaa/skillsmith`
 
 A guided terminal experience (built on [`@clack/prompts`](https://github.com/bombshell-dev/clack))
 that walks the skills already on your machine one by one, opening with a hand-inked blacksmith
@@ -37,7 +39,7 @@ npx @lozadaa/skillsmith
 ```
 
 ```
-┌  skillsmith · agent-skill analyzer
+┌  ⚒ skillsmith · agent-skill analyzer
 │
 ◇  Choose a source
 │  ● Global (~/.claude/skills)   31 skills
@@ -54,7 +56,7 @@ npx @lozadaa/skillsmith
 │
 ◇  ux-writing · 82/100 good
 │
-│  ⚠ [W07] description is over 500 characters (SKILL.md:3)
+│  ⚠ [W07] description is over 500 characters (SKILL.md:3) ⚒
 │    trim to the essential triggers
 │  • [S02] add a "When NOT to use" section
 │  tokens · metadata 120 · body 340 · references 0 · total 460
@@ -68,7 +70,7 @@ npx @lozadaa/skillsmith
 |---|---|
 | **Choose a source** | Global (`~/.claude/skills`), Project (`./.claude/skills`), or **type a custom path** |
 | **Inspect one by one** | Pick a skill from the list to see its findings + token breakdown, then go back for the next |
-| **Browse findings** | Arrow through each warning/finding, `⏎` for its why/how; temper the fixable ones in place |
+| **Browse findings** | Arrow through each warning/finding, `⏎` for its why/how; temper the fixable ones (`⚒`) in place |
 | **Switch the profile** | The *Switch profile* menu item toggles *Claude Code plugin* ↔ *Generic* (agentskills.io) rules |
 | **Apply a fix** | Pick a fixable finding — it writes to disk **after you confirm** |
 | **Export a report** | The *Export report* item (or `--export json\|md` from the shell) |
@@ -117,7 +119,7 @@ clean. `--quiet` reports errors only; `--format compact` gives one `path:line: s
 
 ---
 
-## The web app
+## 🌐 The web app
 
 A static, account-free web app that does everything the CLI does, plus authoring and importing:
 
@@ -140,7 +142,7 @@ npm run start      # serve the export via server.mjs (adds OAuth + caching)
 
 ---
 
-## The engine
+## 🧠 The engine
 
 Both front ends share one linter, `lib/skill-lint`:
 
@@ -155,7 +157,7 @@ package is a single self-contained file that `npx` runs without an install step.
 
 ---
 
-## Repo layout
+## 🗂️ Repo layout
 
 ```
 skillsmith/
@@ -175,7 +177,7 @@ skillsmith/
 
 ---
 
-## Development
+## 🛠️ Development
 
 ```bash
 npm test                       # full suite (web + engine + CLI)
@@ -196,7 +198,7 @@ npm publish                    # scoped public; prepublishOnly rebuilds the bund
 
 ---
 
-## Design
+## 🎨 Design
 
 Skillsmith reads like a page from an inked workshop manual: near-white paper, black pen
 linework, and exactly one hot thing — **ember orange** for what's being worked. A dark "night
@@ -209,4 +211,4 @@ carries the same identity into ANSI. See [`docs/design/ink-style.md`](docs/desig
 
 MIT © Richard A. Lozada
 
-<div align="center"><sub>Forge better skills.</sub></div>
+<div align="center"><sub>Forge better skills. 🔨</sub></div>
