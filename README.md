@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔨 Skillsmith
+# Skillsmith
 
 **The smith's bench for Claude Agent Skills.**
 Inspect, temper, and ship spec-clean `SKILL.md` files — in your browser or your terminal.
@@ -18,26 +18,26 @@ best practices: a static linter with **48 rules**, a 0–100 **proof-mark score*
 educational **token breakdown** of every part of a skill. The same engine powers two front
 ends — a private, static **web app** and a beautiful **terminal app**.
 
-- 🔍 **Inspect** — instant findings (errors, warnings, suggestions), each with *why it matters* and *how to fix it*.
-- 🏷️ **Score** — a single number that tells you how spec-clean a skill is.
-- 🪙 **Tokens** — see exactly what loads into every conversation vs. only when a skill triggers.
-- ⚒️ **Temper** — apply auto-fixes for the fixable findings.
-- 🔒 **Private** — analysis runs locally. Nothing is uploaded.
+- **Inspect** — instant findings (errors, warnings, suggestions), each with *why it matters* and *how to fix it*.
+- **Score** — a single number that tells you how spec-clean a skill is.
+- **Tokens** — see exactly what loads into every conversation vs. only when a skill triggers.
+- **Temper** — apply auto-fixes for the fixable findings.
+- **Private** — analysis runs locally. Nothing is uploaded.
 
 ---
 
-## 🖥️ The CLI — `npx @lozadaa/skillsmith`
+## The CLI — `npx @lozadaa/skillsmith`
 
-A gorgeous, guided terminal experience (built on [`@clack/prompts`](https://github.com/bombshell-dev/clack))
-that walks the skills already on your machine one by one. **Nothing to install** — one command
-scans your global or project skills, or any custom path.
+A guided terminal experience (built on [`@clack/prompts`](https://github.com/bombshell-dev/clack))
+that walks the skills already on your machine one by one, opening with a hand-inked blacksmith
+banner. **Nothing to install** — one command scans your global or project skills, or any custom path.
 
 ```bash
 npx @lozadaa/skillsmith
 ```
 
 ```
-┌  ⚒ skillsmith · agent-skill analyzer
+┌  skillsmith · agent-skill analyzer
 │
 ◇  Choose a source
 │  ● Global (~/.claude/skills)   31 skills
@@ -48,13 +48,13 @@ npx @lozadaa/skillsmith
 │  ● ux-writing               ████████░░  82  good        3 findings
 │  ○ frontend-design-studio   █████████░  92  excellent   4 findings
 │  ○ design-preview-server    █████████░  90  excellent   6 findings
-│  ○ ↻ Switch profile (now: generic)
+│  ○ ↻ Switch profile (now: claude-code-plugin)
 │  ○ ⬇ Export report
 │  ○ ✖ Quit
 │
 ◇  ux-writing · 82/100 good
 │
-│  ⚠ [W07] description is over 500 characters (SKILL.md:3) ⚒
+│  ⚠ [W07] description is over 500 characters (SKILL.md:3)
 │    trim to the essential triggers
 │  • [S02] add a "When NOT to use" section
 │  tokens · metadata 120 · body 340 · references 0 · total 460
@@ -68,27 +68,12 @@ npx @lozadaa/skillsmith
 |---|---|
 | **Choose a source** | Global (`~/.claude/skills`), Project (`./.claude/skills`), or **type a custom path** |
 | **Inspect one by one** | Pick a skill from the list to see its findings + token breakdown, then go back for the next |
-| **Switch the profile** | The *Switch profile* menu item toggles *Generic* (agentskills.io) ↔ *Claude Code plugin* rules |
-| **Apply a fix** | Open a skill → *Apply a fix* → pick a fixable finding (marked `⚒`) — it writes to disk **after you confirm** |
+| **Browse findings** | Arrow through each warning/finding, `⏎` for its why/how; temper the fixable ones in place |
+| **Switch the profile** | The *Switch profile* menu item toggles *Claude Code plugin* ↔ *Generic* (agentskills.io) rules |
+| **Apply a fix** | Pick a fixable finding — it writes to disk **after you confirm** |
 | **Export a report** | The *Export report* item (or `--export json\|md` from the shell) |
 
 Navigate with the arrow keys, `⏎` to choose, `Ctrl-C` to cancel.
-
-### Flags
-
-| Flag | Description |
-|---|---|
-| `--source <global\|local>` | Which `.claude/skills` to scan |
-| `--path <dir>` | Treat `<dir>` as the skills root (works even if it *is* a single skill) |
-| `--profile <claude-code-plugin\|generic>` | Lint profile (default: `claude-code-plugin`) |
-| `check [path]` | Lint like ESLint: report problems and exit non-zero (see below) |
-| `--report` | Print a plain dashboard report and exit (no prompts) |
-| `--export <json\|md> [path]` | Write a report file and exit |
-| `--format <stylish\|compact\|json>` | `check` output format (default: `stylish`) |
-| `--max-warnings <n>` | `check`: exit non-zero if warnings exceed `n` |
-| `--quiet` | `check`: report errors only |
-| `--no-color` | Disable ANSI color |
-| `-h, --help` · `-v, --version` | Usage / version |
 
 ### Lint your project (like ESLint)
 
@@ -114,9 +99,25 @@ ux-writing/SKILL.md
 Output is colored on a real TTY (or with `FORCE_COLOR=1`) and plain when piped, so CI logs stay
 clean. `--quiet` reports errors only; `--format compact` gives one `path:line: severity` per line.
 
+### Flags
+
+| Flag | Description |
+|---|---|
+| `check [path]` | Lint like ESLint: report problems and exit non-zero |
+| `--source <global\|local>` | Which `.claude/skills` to scan |
+| `--path <dir>` | Treat `<dir>` as the skills root (works even if it *is* a single skill) |
+| `--profile <claude-code-plugin\|generic>` | Lint profile (default: `claude-code-plugin`) |
+| `--report` | Print a plain dashboard report and exit (no prompts) |
+| `--export <json\|md> [path]` | Write a report file and exit |
+| `--format <stylish\|compact\|json>` | `check` output format (default: `stylish`) |
+| `--max-warnings <n>` | `check`: exit non-zero if warnings exceed `n` |
+| `--quiet` | `check`: report errors only |
+| `--no-color` | Disable ANSI color |
+| `-h, --help` · `-v, --version` | Usage / version |
+
 ---
 
-## 🌐 The web app
+## The web app
 
 A static, account-free web app that does everything the CLI does, plus authoring and importing:
 
@@ -126,7 +127,7 @@ A static, account-free web app that does everything the CLI does, plus authoring
 - **Bilingual** — English / Spanish with automatic browser detection and a header toggle.
 
 Everything runs client-side. The only server bit is an optional GitHub OAuth exchange for
-publishing skills back to a repo.
+publishing skills back to a repo. Live at [skillsmith.richardlozada.dev](https://skillsmith.richardlozada.dev).
 
 ### Run it locally
 
@@ -139,7 +140,7 @@ npm run start      # serve the export via server.mjs (adds OAuth + caching)
 
 ---
 
-## 🧠 The engine
+## The engine
 
 Both front ends share one linter, `lib/skill-lint`:
 
@@ -154,7 +155,7 @@ package is a single self-contained file that `npx` runs without an install step.
 
 ---
 
-## 🗂️ Repo layout
+## Repo layout
 
 ```
 skillsmith/
@@ -165,7 +166,8 @@ skillsmith/
 │   ├── github/           GitHub import/publish client
 │   └── i18n.ts           EN/ES string catalog
 ├── cli/                  @lozadaa/skillsmith — the terminal app
-│   ├── src/              scan · analyze · fixes · export · report · interactive (clack)
+│   ├── src/              scan · analyze · fixes · export · report · check · interactive (clack)
+│   ├── scripts/          gen-ascii.py — regenerate the blacksmith banner
 │   └── build.mjs         esbuild bundler → dist/skillsmith.mjs
 ├── server.mjs            zero-dep production server (static export + OAuth + caching)
 └── docs/                 specs, plans, and the ink/forge design direction
@@ -173,7 +175,7 @@ skillsmith/
 
 ---
 
-## 🛠️ Development
+## Development
 
 ```bash
 npm test                       # full suite (web + engine + CLI)
@@ -194,7 +196,7 @@ npm publish                    # scoped public; prepublishOnly rebuilds the bund
 
 ---
 
-## 🎨 Design
+## Design
 
 Skillsmith reads like a page from an inked workshop manual: near-white paper, black pen
 linework, and exactly one hot thing — **ember orange** for what's being worked. A dark "night
@@ -207,4 +209,4 @@ carries the same identity into ANSI. See [`docs/design/ink-style.md`](docs/desig
 
 MIT © Richard A. Lozada
 
-<div align="center"><sub>Forge better skills. 🔨</sub></div>
+<div align="center"><sub>Forge better skills.</sub></div>
