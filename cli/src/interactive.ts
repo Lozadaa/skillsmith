@@ -1,69 +1,61 @@
-// Interactive experience built on @clack/prompts: a polished, guided flow that
-// walks skills one by one, with a spinner during analysis, colored score bars,
-// boxed finding panels, and confirm-gated fixes. Used only on a real TTY; CI and
+// Interactive experience built on @clack/prompts, skinned to the ink/forge line
+// (docs/design/ink-style.md): a night-forge blacksmith banner, ember accents,
+// exact severity/score inks, and a navigable findings browser. TTY only; CI and
 // pipes go through the plain report in report.ts instead.
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import * as p from "@clack/prompts";
-import pc from "picocolors";
 import type { Finding, Profile, ScoreResult } from "../../lib/skill-lint";
 import { analyzeSource, orderedFindings, relint, type AnalyzedSkill } from "./analyze";
 import { listSkillDirs, type SourceRef } from "./scan";
 import { previewFix, commitFix } from "./fixes";
 import { toJson, toMarkdown, writeReport } from "./export";
+import { blacksmith } from "./art";
 
-const ember = (s: string) => `\x1b[38;2;232;89;12m${s}\x1b[39m`;
-type Band = ScoreResult["band"];
-const bandColor: Record<Band, (s: string) => string> = {
-  excellent: pc.green,
-  good: pc.cyan,
-  "needs-work": pc.yellow,
-  poor: pc.red,
+// ── ink/forge truecolor palette (night-forge values) ──────────────────────────
+const tc = (r: number, g: number, b: number) => (s: string) => `\x1b[38;2;${r};${g};${b}m${s}\x1b[39m`;
+const ink = {
+  ember: tc(232, 89, 12), // #E8590C — the one hot accent
+  bone: tc(234, 228, 216), // #EAE4D8 — chalk linework
+  soft: tc(163, 154, 139), // #A39A8B — secondary / dim
+  error: tc(229, 72, 77), // #E5484D
+  warning: tc(217, 160, 63), // #D9A03F
+  suggestion: tc(108, 169, 224), // #6CA9E0
 };
-const sevColor: Record<Finding["severity"], (s: string) => string> = {
-  error: pc.red,
-  warning: pc.yellow,
-  suggestion: pc.blue,
+const bold = (s: string) => `\x1b[1m${s}\x1b[22m`;
+const underline = (s: string) => `\x1b[4m${s}\x1b[24m`;
+
+type Band = ScoreResult["band"];
+// Excellent earns the hot proof-mark (ember); the rest step down through bone,
+// warning amber, error red — matching the ScoreBadge stamp semantics.
+const bandPaint: Record<Band, (s: string) => string> = {
+  excellent: ink.ember,
+  good: ink.bone,
+  "needs-work": ink.warning,
+  poor: ink.error,
+};
+const sevPaint: Record<Finding["severity"], (s: string) => string> = {
+  error: ink.error,
+  warning: ink.warning,
+  suggestion: ink.suggestion,
 };
 const sevMark: Record<Finding["severity"], string> = { error: "✖", warning: "⚠", suggestion: "•" };
 
 function bar(value: number, width = 10): string {
   const filled = Math.max(0, Math.min(width, Math.round((value / 100) * width)));
-  const color = value >= 85 ? pc.green : value >= 60 ? pc.cyan : value >= 40 ? pc.yellow : pc.red;
-  return color("█".repeat(filled)) + pc.dim("░".repeat(width - filled));
+  const paint = value >= 85 ? ink.ember : value >= 60 ? ink.bone : value >= 40 ? ink.warning : ink.error;
+  return paint("█".repeat(filled)) + ink.soft("░".repeat(width - filled));
 }
 
 function skillLabel(k: AnalyzedSkill): string {
   const name = k.dirName.length > 26 ? k.dirName.slice(0, 25) + "…" : k.dirName.padEnd(26);
-  if (k.outcome.kind !== "skill") return `${name} ${pc.dim("not a skill")}`;
+  if (k.outcome.kind !== "skill") return `${name} ${ink.soft("not a skill")}`;
   const { value, band } = k.outcome.score;
   const n = k.outcome.findings.length;
-  return `${name} ${bar(value)} ${bandColor[band](String(value).padStart(3))} ${pc.dim(
+  return `${name} ${bar(value)} ${bandPaint[band](String(value).padStart(3))} ${ink.soft(
     band.padEnd(11)
-  )} ${pc.dim(`${n} finding${n === 1 ? "" : "s"}`)}`;
-}
-
-function findingsPanel(k: AnalyzedSkill): string {
-  if (k.outcome.kind !== "skill") return pc.dim("This folder is not a skill.");
-  const o = k.outcome;
-  const lines: string[] = [];
-  const findings = orderedFindings(o.findings);
-  if (!findings.length) lines.push(pc.green("✔ clean — passes every enabled rule"));
-  for (const f of findings) {
-    const loc = f.line ? pc.dim(` (${f.file ?? "SKILL.md"}:${f.line})`) : "";
-    const wrench = f.fix ? ember(" ⚒") : "";
-    lines.push(`${sevColor[f.severity](sevMark[f.severity])} ${pc.dim(`[${f.ruleId}]`)} ${f.message}${loc}${wrench}`);
-    lines.push(pc.dim(`  ${f.howToFix}`));
-  }
-  const t = o.tokens;
-  lines.push("");
-  lines.push(
-    pc.dim(
-      `tokens · metadata ${t.metadata} · body ${t.body} · references ${t.references} · scripts ${t.scriptFiles} · total ${t.total}`
-    )
-  );
-  return lines.join("\n");
+  )} ${ink.soft(`${n} finding${n === 1 ? "" : "s"}`)}`;
 }
 
 const bail = (v: unknown): boolean => {
@@ -81,7 +73,7 @@ async function chooseSource(sources: SourceRef[], profile: Profile): Promise<Sou
       label: s.label,
       hint: `${listSkillDirs(s.root).length} skills`,
     })),
-    { value: "custom", label: `${ember("＋")} enter a custom path…`, hint: "any folder" },
+    { value: "custom", label: `${ink.ember("＋")} enter a custom path…`, hint: "any folder" },
   ];
   const choice = await p.select({ message: "Choose a source", options, maxItems: 12 });
   if (bail(choice)) return null;
@@ -108,58 +100,67 @@ async function chooseSource(sources: SourceRef[], profile: Profile): Promise<Sou
   return sources[Number((choice as string).split(":")[1])];
 }
 
-async function fixFlow(skill: AnalyzedSkill, profile: Profile): Promise<AnalyzedSkill> {
-  if (skill.outcome.kind !== "skill") return skill;
-  const fixable = orderedFindings(skill.outcome.findings).filter((f) => f.fix);
-  if (!fixable.length) {
-    p.log.warn("No auto-fixable findings on this skill.");
-    return skill;
-  }
-  const pick = await p.select({
-    message: "Which finding?",
-    options: fixable.map((f, i) => ({
-      value: String(i),
-      label: `${sevColor[f.severity](sevMark[f.severity])} ${f.message}`,
-      hint: f.fix!.label,
-    })),
-    maxItems: 10,
-  });
-  if (bail(pick)) return skill;
-  const preview = previewFix(skill, fixable[Number(pick)]);
-  if (!preview || !preview.changed.length) {
-    p.log.warn("That fix produces no change.");
-    return skill;
-  }
-  const ok = await p.confirm({ message: `Write ${preview.changed.join(", ")} to disk?` });
-  if (bail(ok) || !ok) return skill;
-  const s = p.spinner();
-  s.start("Tempering");
-  const updated = commitFix(skill, preview, profile);
-  s.stop(pc.green(`Applied · ${preview.label}`));
-  return updated;
-}
-
+/** Navigable findings browser for one skill. Arrow through findings, ⏎ for
+ *  details, and temper the fixable ones (⚒) in place. */
 async function inspect(skills: AnalyzedSkill[], idx: number, profile: Profile): Promise<void> {
   for (;;) {
     const skill = skills[idx];
-    const title =
-      skill.outcome.kind === "skill"
-        ? `${skill.dirName} · ${bandColor[skill.outcome.score.band](
-            `${skill.outcome.score.value}/100 ${skill.outcome.score.band}`
-          )}`
-        : skill.dirName;
-    p.note(findingsPanel(skill), title);
-    const fixable =
-      skill.outcome.kind === "skill" ? orderedFindings(skill.outcome.findings).filter((f) => f.fix).length : 0;
-    const action = await p.select({
-      message: "Now what?",
+    if (skill.outcome.kind !== "skill") {
+      p.note(ink.soft("This folder is not a skill."), skill.dirName);
+      return;
+    }
+    const o = skill.outcome;
+    const t = o.tokens;
+    p.note(
+      `${bandPaint[o.score.band](bold(`${o.score.value}/100 · ${o.score.band}`))}\n` +
+        ink.soft(
+          `tokens · metadata ${t.metadata} · body ${t.body} · references ${t.references} · scripts ${t.scriptFiles} · total ${t.total}`
+        ),
+      skill.dirName
+    );
+
+    const findings = orderedFindings(o.findings);
+    if (!findings.length) {
+      p.log.success(ink.bone("Clean — passes every enabled rule."));
+      return;
+    }
+
+    const choice = await p.select({
+      message: "Findings — pick one for details",
+      maxItems: 12,
       options: [
-        ...(fixable ? [{ value: "fix", label: `${ember("⚒")} Apply a fix`, hint: `${fixable} available` }] : []),
-        { value: "back", label: "← Back to the list" },
+        ...findings.map((f, i) => ({
+          value: String(i),
+          label: `${sevPaint[f.severity](sevMark[f.severity])} ${f.message}`,
+          hint: `${f.ruleId}${f.line ? `:${f.line}` : ""}${f.fix ? " · fixable ⚒" : ""}`,
+        })),
+        { value: "back", label: ink.soft("← Back to the list") },
       ],
     });
-    if (bail(action) || action === "back") return;
-    if (action === "fix") skills[idx] = await fixFlow(skill, profile);
+    if (bail(choice) || choice === "back") return;
+
+    const f = findings[Number(choice)];
+    const loc = f.line ? ` (${f.file ?? "SKILL.md"}:${f.line})` : "";
+    p.note(
+      `${ink.soft("why")}  ${f.why}\n${ink.soft("fix")}  ${f.howToFix}`,
+      `${sevPaint[f.severity](sevMark[f.severity])} ${f.message}${loc}`
+    );
+
+    if (f.fix) {
+      const preview = previewFix(skill, f);
+      if (!preview || !preview.changed.length) {
+        p.log.warn("That fix produces no change.");
+      } else {
+        const ok = await p.confirm({ message: `Temper — write ${preview.changed.join(", ")} to disk?` });
+        if (!bail(ok) && ok) {
+          const s = p.spinner();
+          s.start("Tempering");
+          skills[idx] = commitFix(skill, preview, profile);
+          s.stop(ink.ember(`Applied · ${preview.label}`));
+        }
+      }
+    }
+    // loop back to the (now possibly updated) findings list
   }
 }
 
@@ -175,11 +176,12 @@ async function exportFlow(skills: AnalyzedSkill[], source: SourceRef, profile: P
   const path = `./skillsmith-report.${fmt}`;
   const meta = { source: source.label, profile, generatedAt: new Date().toISOString() };
   writeReport(path, fmt === "json" ? toJson(skills, meta) : toMarkdown(skills, meta));
-  p.log.success(`Exported ${pc.underline(path)}`);
+  p.log.success(`Exported ${underline(path)}`);
 }
 
 export async function runInteractive(sources: SourceRef[], initialProfile: Profile): Promise<void> {
-  p.intro(`${ember("⚒ skillsmith")} ${pc.dim("· agent-skill analyzer")}`);
+  process.stdout.write("\n" + blacksmith(ink.soft) + "\n");
+  p.intro(`${ink.ember(bold("⚒ skillsmith"))} ${ink.soft("· agent-skill analyzer")}`);
   let profile = initialProfile;
 
   const source = await chooseSource(sources, profile);
@@ -188,10 +190,10 @@ export async function runInteractive(sources: SourceRef[], initialProfile: Profi
   const spin = p.spinner();
   spin.start(`Inspecting ${source.label}`);
   let skills = analyzeSource(source, profile);
-  spin.stop(`${skills.length} skill${skills.length === 1 ? "" : "s"} · profile ${pc.cyan(profile)}`);
+  spin.stop(`${skills.length} skill${skills.length === 1 ? "" : "s"} · profile ${ink.ember(profile)}`);
 
   if (!skills.length) {
-    p.outro(pc.dim("Nothing to analyze here."));
+    p.outro(ink.soft("Nothing to analyze here."));
     return;
   }
 
@@ -201,16 +203,16 @@ export async function runInteractive(sources: SourceRef[], initialProfile: Profi
       maxItems: 12,
       options: [
         ...skills.map((k, i) => ({ value: `skill:${i}`, label: skillLabel(k) })),
-        { value: "profile", label: `↻ Switch profile ${pc.dim(`(now: ${profile})`)}` },
-        { value: "export", label: "⬇ Export report" },
-        { value: "quit", label: "✖ Quit" },
+        { value: "profile", label: `${ink.soft("↻")} Switch profile ${ink.soft(`(now: ${profile})`)}` },
+        { value: "export", label: `${ink.soft("⬇")} Export report` },
+        { value: "quit", label: `${ink.soft("✖")} Quit` },
       ],
     });
     if (bail(choice) || choice === "quit") break;
     if (choice === "profile") {
       profile = profile === "generic" ? "claude-code-plugin" : "generic";
       skills = skills.map((k) => relint(k, profile));
-      p.log.info(`Profile: ${pc.cyan(profile)}`);
+      p.log.info(`Profile: ${ink.ember(profile)}`);
       continue;
     }
     if (choice === "export") {
@@ -219,5 +221,5 @@ export async function runInteractive(sources: SourceRef[], initialProfile: Profi
     }
     await inspect(skills, Number((choice as string).split(":")[1]), profile);
   }
-  p.outro(ember("Forge better skills."));
+  p.outro(ink.ember("Forge better skills."));
 }
