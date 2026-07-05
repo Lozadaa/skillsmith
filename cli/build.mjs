@@ -2,10 +2,12 @@
 // with zero runtime dependencies. The published package ships only dist/, so
 // `npx @lozadaa/skillsmith` downloads a tiny, install-free tarball.
 import { build } from "esbuild";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(here, "package.json"), "utf8"));
 
 await build({
   entryPoints: [join(here, "src/main.ts")],
@@ -14,6 +16,8 @@ await build({
   platform: "node",
   format: "esm",
   target: "node20",
+  // Single source of truth for --version: inject package.json's version.
+  define: { __CLI_VERSION__: JSON.stringify(pkg.version) },
   // The engine bundles the CJS `yaml` package. In ESM output esbuild's CJS shim
   // needs a real `require`; createRequire provides one so its internal
   // `require("process")` etc. resolve instead of throwing "Dynamic require".

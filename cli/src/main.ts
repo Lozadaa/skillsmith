@@ -8,7 +8,9 @@ import { toJson, toMarkdown, writeReport } from "./export";
 import { detectCaps, makeTheme } from "./tui/theme";
 import { runInteractive } from "./interactive";
 
-const VERSION = "0.1.0";
+// Replaced at build time by esbuild's define from package.json (see build.mjs).
+declare const __CLI_VERSION__: string;
+const VERSION = typeof __CLI_VERSION__ === "string" ? __CLI_VERSION__ : "0.0.0-dev";
 
 const argv = process.argv.slice(2);
 const has = (f: string) => argv.includes(f);
